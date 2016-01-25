@@ -10,15 +10,17 @@
     <Label style="-fx-font: NORMAL 20 Tahoma;" text="Techno Sync"
            GridPane.columnIndex="0" GridPane.rowIndex="0">
     </Label>
-    <TableView fx:id="tableView" GridPane.columnIndex="0"
+    <TableView fx:id="tracks" GridPane.columnIndex="0"
                GridPane.rowIndex="1">
         <columns>
-            <TableColumn text="Filename">
-                <cellValueFactory><PropertyValueFactory property="filename" />
+            <TableColumn fx:id="filename" text="Filename" prefWidth="150">
+                <cellValueFactory>
+                    <PropertyValueFactory property="filename" />
                 </cellValueFactory>
             </TableColumn>
-            <TableColumn text="BPM">
-                <cellValueFactory><PropertyValueFactory property="bpm" />
+            <TableColumn fx:id="bpm" text="BPM" prefWidth="150">
+                <cellValueFactory>
+                    <PropertyValueFactory property="bpm" />
                 </cellValueFactory>
             </TableColumn>
         </columns>

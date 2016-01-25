@@ -1,10 +1,10 @@
 package com.jackpf.technosync;
 
-import TrackAnalyzer.TrackAnalyzer;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.TableView;
 import javafx.stage.Stage;
 
 /**
@@ -26,14 +26,19 @@ public class Main extends Application {
             Executor ffmpeg = new Executor("ffmpeg"),
                 rubberband = new Executor("rubberband");
 
-            TrackAnalyzer analyzer = new TrackAnalyzer(new String[]{f, "-w", "-o", "/Users/jackfarrelly/results.txt"});
-            TrackAnalyzer.Info info = analyzer.analyzeTrack(f, false);
+            //TrackAnalyzer analyzer = new TrackAnalyzer(new String[]{f, "-w", "-o", "/Users/jackfarrelly/results.txt"});
+            //TrackAnalyzer.Info info = analyzer.analyzeTrack(f, false);
 
-            System.out.println(info.filename + ": " + info.bpm + "bpm");
+            //System.out.println(info.filename + ": " + info.bpm + "bpm");
 
             Parent root = FXMLLoader.load(getClass().getResource("/layout/main.fxml"));
+
             stage.setTitle("Techno Sync");
             stage.setScene(new Scene(root, 300, 275));
+
+            TableView tableView = (TableView) root.lookup("#tracks");
+            tableView.setEditable(true);
+
             stage.show();
 
             //ffmpeg.run(new String[]{"-i", info.filename, "/tmp/tmp.wav"});
