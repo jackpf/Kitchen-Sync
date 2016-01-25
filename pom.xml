@@ -51,6 +51,11 @@
             <artifactId>jlayer</artifactId>
             <version>1.0.1</version>
         </dependency>
+        <dependency>
+            <groupId>be.tarsos</groupId>
+            <artifactId>be.tarsos.dsp</artifactId>
+            <version>latest</version>
+        </dependency>
     </dependencies>
 
     <build>

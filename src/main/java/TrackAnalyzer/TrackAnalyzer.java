@@ -23,37 +23,25 @@
 package TrackAnalyzer;
 
 import at.ofai.music.beatroot.BeatRoot;
+import com.beust.jcommander.JCommander;
 import it.sauronsoftware.jave.*;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import org.jaudiotagger.audio.AudioFile;
+import org.jaudiotagger.audio.AudioFileIO;
+import org.jaudiotagger.audio.exceptions.CannotWriteException;
+import org.jaudiotagger.tag.*;
+import org.jaudiotagger.tag.flac.FlacTag;
+import org.jaudiotagger.tag.id3.*;
+import org.jaudiotagger.tag.id3.framebody.FrameBodyTXXX;
+import org.jaudiotagger.tag.mp4.Mp4Tag;
+import org.jaudiotagger.tag.mp4.field.Mp4TagReverseDnsField;
+import org.jaudiotagger.tag.vorbiscomment.VorbisCommentTag;
+
+import java.io.*;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.concurrent.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.jaudiotagger.audio.AudioFile;
-import org.jaudiotagger.audio.AudioFileIO;
-import org.jaudiotagger.audio.exceptions.CannotWriteException;
-import org.jaudiotagger.tag.FieldDataInvalidException;
-import org.jaudiotagger.tag.FieldKey;
-import org.jaudiotagger.tag.KeyNotFoundException;
-import org.jaudiotagger.tag.Tag;
-import org.jaudiotagger.tag.TagField;
-import org.jaudiotagger.tag.flac.FlacTag;
-import org.jaudiotagger.tag.id3.*;
-import org.jaudiotagger.tag.id3.framebody.FrameBodyTXXX;
-import org.jaudiotagger.tag.mp4.Mp4FieldKey;
-import org.jaudiotagger.tag.mp4.Mp4Tag;
-import org.jaudiotagger.tag.mp4.field.Mp4TagReverseDnsField;
-import org.jaudiotagger.tag.mp4.field.Mp4TagTextField;
-import org.jaudiotagger.tag.vorbiscomment.VorbisCommentTag;
-import com.beust.jcommander.JCommander;
-import com.beust.jcommander.Parameter;
 
 public class TrackAnalyzer {
 
@@ -197,9 +185,9 @@ public class TrackAnalyzer {
 			this.filename = filename;
 		}
 
-		@Override
+		//@Override
 		public Boolean call() {
-			return analyzeTrack(filename, c.writeTags);
+			return analyzeTrack(filename, c.writeTags) != null;
 		}
 	}
 
@@ -234,6 +222,18 @@ public class TrackAnalyzer {
 		}
 	}
 
+	public static class Info {
+		public final String filename;
+		public final int bpm;
+		public final float realBpm;
+		public final String key;
+		public Info(String filename, float bpm, String key) {
+			this.filename = filename;
+			this.realBpm = bpm;
+			this.bpm = Math.round(bpm);
+			this.key = key;
+		}
+	}
 	/**
 	 * runs key and bpm detector on
 	 *
@@ -241,7 +241,7 @@ public class TrackAnalyzer {
 	 * @param filename
 	 * @return
 	 */
-	public boolean analyzeTrack(String filename, boolean writeTags) {
+	public Info analyzeTrack(String filename, boolean writeTags) {
 		String wavfilename = "";
 		AudioData data = new AudioData();
 		File temp = null;
@@ -261,7 +261,7 @@ public class TrackAnalyzer {
 				logDetectionResult(filename, "-", "-", false);
 				temp.delete();
 				temp2.delete();
-				return false;
+				return null;
 			}
 		}
 
@@ -276,7 +276,7 @@ public class TrackAnalyzer {
 			Logger.getLogger(TrackAnalyzer.class.getName()).log(Level.SEVERE, null, ex);
 			logDetectionResult(filename, "-", "-", false);
 			deleteTempFiles(temp, temp2);
-			return false;
+			return null;
 		}
 
 		String formattedBpm = "0";
@@ -320,7 +320,8 @@ public class TrackAnalyzer {
 		}
 		logDetectionResult(filename, Parameters.camelotKey(r.globalKeyEstimate), formattedBpm, wroteTags);
 		deleteTempFiles(temp, temp2);
-		return true;
+
+		return new Info(filename, Float.parseFloat(formattedBpm), Parameters.camelotKey(r.globalKeyEstimate));
 	}
 
 	private void deleteTempFiles(File temp, File temp2) {
