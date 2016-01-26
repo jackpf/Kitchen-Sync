@@ -14,6 +14,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import sun.awt.Mutex;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -27,6 +28,8 @@ public class Controller {
     private Stage stage;
 
     private Executor ffmpeg, rubberband;
+
+    private static final Mutex analyzerMutex = new Mutex();
 
     @FXML
     private TableView<Info> tracks;
@@ -45,10 +48,10 @@ public class Controller {
         rubberband = new Executor("rubberband");
     }
 
-    public class ServiceExample extends Service<TrackAnalyzer.Info> {
+    public class AnalyzerService extends Service<TrackAnalyzer.Info> {
         private final Info trackInfo;
 
-        public ServiceExample(Info trackInfo) {
+        public AnalyzerService(Info trackInfo) {
             this.trackInfo = trackInfo;
         }
 
@@ -57,8 +60,10 @@ public class Controller {
             return new Task<TrackAnalyzer.Info>() {
                 @Override
                 protected TrackAnalyzer.Info call() throws Exception {
+                    analyzerMutex.lock();
                     TrackAnalyzer analyzer = new TrackAnalyzer(new String[]{trackInfo.getFilename(), "-w", "-o", "/tmp/trackanalyzer.txt"});
                     TrackAnalyzer.Info info = analyzer.analyzeTrack(trackInfo.getFilename(), false);
+                    analyzerMutex.unlock();
                     return info;
                 }
             };
@@ -68,10 +73,10 @@ public class Controller {
     protected void addTrack(File file) {
         final ObservableList<Info> data = tracks.getItems();
 
-        Info trackInfo = new Info(file.getAbsolutePath(), "-");
+        Info trackInfo = new Info(file.getAbsolutePath(), file.getName(), Info.NO_BPM);
         data.add(trackInfo);
 
-        final ServiceExample serviceExample = new ServiceExample(trackInfo);
+        final AnalyzerService serviceExample = new AnalyzerService(trackInfo);
 
         //Here you tell your progress indicator is visible only when the service is runing
         progressIndicator.visibleProperty().bind(serviceExample.runningProperty());

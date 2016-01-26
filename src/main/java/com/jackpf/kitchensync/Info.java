@@ -6,11 +6,15 @@ import javafx.beans.property.SimpleStringProperty;
  * Created by jackfarrelly on 25/01/2016.
  */
 public class Info {
+    public final String NO_BPM = "-";
+
     public final SimpleStringProperty filename = new SimpleStringProperty();
+    public final SimpleStringProperty displayName = new SimpleStringProperty();
     public final SimpleStringProperty bpm = new SimpleStringProperty();
 
-    public Info(String filename, String bpm) {
+    public Info(String filename, String displayName, String bpm) {
         setFilename(filename);
+        setDisplayName(displayName);
         setBpm(bpm);
     }
 
@@ -24,6 +28,18 @@ public class Info {
 
     public void setFilename(String filename) {
         this.filename.set(filename);
+    }
+
+    public String getDisplayName() {
+        return displayName.get();
+    }
+
+    public SimpleStringProperty displayNameProperty() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName.set(displayName);
     }
 
     public String getBpm() {
