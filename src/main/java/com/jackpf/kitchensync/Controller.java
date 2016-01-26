@@ -1,4 +1,4 @@
-package com.jackpf.technosync;
+package com.jackpf.kitchensync;
 
 import TrackAnalyzer.TrackAnalyzer;
 import javafx.collections.ObservableList;

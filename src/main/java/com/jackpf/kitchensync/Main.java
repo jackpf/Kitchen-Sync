@@ -1,4 +1,4 @@
-package com.jackpf.technosync;
+package com.jackpf.kitchensync;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -23,7 +23,7 @@ public class Main extends Application {
         Controller controller = loader.getController();
         controller.initialise(stage);
 
-        stage.setTitle("Techno Sync");
+        stage.setTitle("Kitchen Sync");
         stage.setScene(new Scene(root, 300, 275));
 
         stage.show();

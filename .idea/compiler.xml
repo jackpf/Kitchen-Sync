@@ -22,11 +22,11 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="true" />
-        <module name="Techno Sync" />
+        <module name="Kitchen Sync" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="Techno Sync" target="1.5" />
+      <module name="Kitchen Sync" target="1.5" />
     </bytecodeTargetLevel>
   </component>
 </project>

@@ -1,4 +1,4 @@
-package com.jackpf.technosync;
+package com.jackpf.kitchensync;
 
 import java.io.BufferedReader;
 import java.io.IOException;
