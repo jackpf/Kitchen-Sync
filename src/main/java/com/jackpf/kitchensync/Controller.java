@@ -2,8 +2,13 @@ package com.jackpf.kitchensync;
 
 import TrackAnalyzer.TrackAnalyzer;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Service;
+import javafx.concurrent.Task;
+import javafx.concurrent.WorkerStateEvent;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.TextFieldTableCell;
@@ -29,6 +34,9 @@ public class Controller {
     @FXML
     private TableColumn bpm;
 
+    @FXML
+    private ProgressIndicator progressIndicator;
+
     public void initialise(Stage stage) {
         this.stage = stage;
         bpm.setCellFactory(TextFieldTableCell.<Info>forTableColumn());
@@ -37,13 +45,54 @@ public class Controller {
         rubberband = new Executor("rubberband");
     }
 
-    protected void addTrack(String filename) throws Exception {
-        TrackAnalyzer analyzer = new TrackAnalyzer(new String[]{filename, "-w", "-o", "/tmp/trackanalyzer.txt"});
-        TrackAnalyzer.Info info = analyzer.analyzeTrack(filename, false);
+    public class ServiceExample extends Service<TrackAnalyzer.Info> {
+        private final Info trackInfo;
 
-        ObservableList<Info> data = tracks.getItems();
-        Info trackInfo = new Info(info.filename, Integer.toString(info.bpm));
+        public ServiceExample(Info trackInfo) {
+            this.trackInfo = trackInfo;
+        }
+
+        @Override
+        protected Task<TrackAnalyzer.Info> createTask() {
+            return new Task<TrackAnalyzer.Info>() {
+                @Override
+                protected TrackAnalyzer.Info call() throws Exception {
+                    TrackAnalyzer analyzer = new TrackAnalyzer(new String[]{trackInfo.getFilename(), "-w", "-o", "/tmp/trackanalyzer.txt"});
+                    TrackAnalyzer.Info info = analyzer.analyzeTrack(trackInfo.getFilename(), false);
+                    return info;
+                }
+            };
+        }
+    }
+
+    protected void addTrack(File file) {
+        final ObservableList<Info> data = tracks.getItems();
+
+        Info trackInfo = new Info(file.getAbsolutePath(), "-");
         data.add(trackInfo);
+
+        final ServiceExample serviceExample = new ServiceExample(trackInfo);
+
+        //Here you tell your progress indicator is visible only when the service is runing
+        progressIndicator.visibleProperty().bind(serviceExample.runningProperty());
+        serviceExample.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
+            public void handle(WorkerStateEvent workerStateEvent) {
+                TrackAnalyzer.Info info = serviceExample.getValue();
+                for (Info track : data) {
+                    if (track.getFilename().equals(info.filename)) {
+                        track.setBpm(Integer.toString(info.bpm));
+                        continue;
+                    }
+                }
+            }
+        });
+
+        /*serviceExample.setOnFailed(new EventHandler<WorkerStateEvent>() {
+            public void handle(WorkerStateEvent workerStateEvent) {
+                //DO stuff on failed
+            }
+        });*/
+        serviceExample.start(); //here you start your service
     }
 
     @FXML
@@ -53,11 +102,7 @@ public class Controller {
         fileChooser.getExtensionFilters().add(extFilter);
         List<File> files = fileChooser.showOpenMultipleDialog(stage);
         for (File file : files) {
-            try {
-                addTrack(file.getAbsolutePath());
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            addTrack(file);
         }
     }
 
