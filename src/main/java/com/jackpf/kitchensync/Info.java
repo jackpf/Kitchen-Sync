@@ -6,7 +6,7 @@ import javafx.beans.property.SimpleStringProperty;
  * Created by jackfarrelly on 25/01/2016.
  */
 public class Info {
-    public final String NO_BPM = "-";
+    public static final String NO_BPM = "-";
 
     public final SimpleStringProperty filename = new SimpleStringProperty();
     public final SimpleStringProperty displayName = new SimpleStringProperty();

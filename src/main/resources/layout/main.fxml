@@ -9,9 +9,14 @@
     </padding>
     <VBox spacing="10">
         <children>
-            <HBox spacing="175">
+            <HBox spacing="115">
                 <children>
-                    <Button text="Add files" onAction="#addFiles" prefWidth="100" prefHeight="25"/>
+                    <HBox spacing="10">
+                        <children>
+                            <Button fx:id="addButton" text="Add files" onAction="#addFiles" prefWidth="100" prefHeight="25"/>
+                            <Button fx:id="runButton" text="Run" onAction="#run" prefWidth="75" prefHeight="25" disable="true"/>
+                        </children>
+                    </HBox>
                     <ProgressIndicator fx:id="progressIndicator"
                        maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
                        minWidth="-Infinity" prefHeight="25" prefWidth="25"

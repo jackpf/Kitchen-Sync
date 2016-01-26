@@ -8,6 +8,7 @@ import javafx.concurrent.WorkerStateEvent;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -39,6 +40,12 @@ public class Controller {
 
     @FXML
     private ProgressIndicator progressIndicator;
+
+    @FXML
+    private Button addButton;
+
+    @FXML
+    private Button runButton;
 
     public void initialise(Stage stage) {
         this.stage = stage;
@@ -78,7 +85,6 @@ public class Controller {
 
         final AnalyzerService serviceExample = new AnalyzerService(trackInfo);
 
-        //Here you tell your progress indicator is visible only when the service is runing
         progressIndicator.visibleProperty().bind(serviceExample.runningProperty());
         serviceExample.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
             public void handle(WorkerStateEvent workerStateEvent) {
@@ -92,12 +98,7 @@ public class Controller {
             }
         });
 
-        /*serviceExample.setOnFailed(new EventHandler<WorkerStateEvent>() {
-            public void handle(WorkerStateEvent workerStateEvent) {
-                //DO stuff on failed
-            }
-        });*/
-        serviceExample.start(); //here you start your service
+        serviceExample.start();
     }
 
     @FXML
@@ -106,6 +107,11 @@ public class Controller {
         FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("Audio files", new ArrayList<String>(Arrays.asList("*.mp3", "*.wav")));
         fileChooser.getExtensionFilters().add(extFilter);
         List<File> files = fileChooser.showOpenMultipleDialog(stage);
+
+        if (files.size() > 0) {
+            runButton.setDisable(false);
+        }
+
         for (File file : files) {
             addTrack(file);
         }
