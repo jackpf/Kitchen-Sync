@@ -2,8 +2,6 @@ package com.jackpf.kitchensync;
 
 import TrackAnalyzer.TrackAnalyzer;
 import javafx.collections.ObservableList;
-import javafx.concurrent.Service;
-import javafx.concurrent.Task;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -12,7 +10,6 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import sun.awt.Mutex;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -25,10 +22,6 @@ import java.util.Optional;
  */
 public class Controller {
     private Stage stage;
-
-    private Executor ffmpeg, rubberband;
-
-    private static final Mutex analyzerMutex = new Mutex();
 
     @FXML
     private TableView<Info> tracks;
@@ -54,31 +47,6 @@ public class Controller {
                 enableRunButtonIfReady();
             }
         });
-
-        ffmpeg = new Executor("ffmpeg");
-        rubberband = new Executor("rubberband");
-    }
-
-    public class AnalyzerService extends Service<TrackAnalyzer.Info> {
-        private final Info trackInfo;
-
-        public AnalyzerService(Info trackInfo) {
-            this.trackInfo = trackInfo;
-        }
-
-        @Override
-        protected Task<TrackAnalyzer.Info> createTask() {
-            return new Task<TrackAnalyzer.Info>() {
-                @Override
-                protected TrackAnalyzer.Info call() throws Exception {
-                    analyzerMutex.lock();
-                    TrackAnalyzer analyzer = new TrackAnalyzer(new String[]{trackInfo.getFilename(), "-w", "-o", "/tmp/trackanalyzer.txt"});
-                    TrackAnalyzer.Info info = analyzer.analyzeTrack(trackInfo.getFilename(), false);
-                    analyzerMutex.unlock();
-                    return info;
-                }
-            };
-        }
     }
 
     protected void enableRunButtonIfReady() {
@@ -99,15 +67,20 @@ public class Controller {
     protected void addTrack(File file) {
         final ObservableList<Info> data = tracks.getItems();
 
-        Info trackInfo = new Info(file.getAbsolutePath(), file.getName(), Info.NO_BPM);
-        data.add(trackInfo);
+        Info trackInfo = new Info(file, Info.NO_BPM);
 
-        final AnalyzerService serviceExample = new AnalyzerService(trackInfo);
+        if (data.contains(trackInfo)) {
+            return;
+        } else {
+            data.add(trackInfo);
+        }
 
-        progressIndicator.visibleProperty().bind(serviceExample.runningProperty());
-        serviceExample.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
+        final AnalyzerService analyzer = new AnalyzerService(trackInfo);
+
+        progressIndicator.visibleProperty().bind(analyzer.runningProperty());
+        analyzer.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
             public void handle(WorkerStateEvent workerStateEvent) {
-                TrackAnalyzer.Info info = serviceExample.getValue();
+                TrackAnalyzer.Info info = analyzer.getValue();
 
                 for (Info track : data) {
                     if (track.getFilename().equals(info.filename)) {
@@ -119,7 +92,7 @@ public class Controller {
             }
         });
 
-        serviceExample.start();
+        analyzer.start();
     }
 
     @FXML
@@ -143,10 +116,24 @@ public class Controller {
 
         Optional<String> result = dialog.showAndWait();
         if (result.isPresent()){
-            System.out.println("Target BPM: " + result.get());
-        }
+            FileChooser fileChooser = new FileChooser();
+            File dir = fileChooser.showSaveDialog(stage);
 
-        //ffmpeg.run(new String[]{"-i", info.filename, "/tmp/tmp.wav"});
-        //rubberband.run(new String[]{"--tempo", Float.toString(targetBpm / info.bpm), "/tmp/tmp.wav", "/Users/jackfarrelly/Downloads/out.wav"});
+            if (dir != null) {
+                final ObservableList<Info> data = tracks.getItems();
+                for (Info info : data) {
+                    final ProcessorService processor = new ProcessorService(info, Integer.parseInt(result.get()), dir);
+
+                    progressIndicator.visibleProperty().bind(processor.runningProperty());
+                    processor.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
+                        public void handle(WorkerStateEvent workerStateEvent) {
+                            Info track = processor.getValue();
+                            data.remove(track);
+                        }
+                    });
+                    processor.start();
+                }
+            }
+        }
     }
 }

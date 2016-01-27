@@ -2,19 +2,24 @@ package com.jackpf.kitchensync;
 
 import javafx.beans.property.SimpleStringProperty;
 
+import java.io.File;
+
 /**
  * Created by jackfarrelly on 25/01/2016.
  */
 public class Info {
     public static final String NO_BPM = "-";
 
-    public final SimpleStringProperty filename = new SimpleStringProperty();
-    public final SimpleStringProperty displayName = new SimpleStringProperty();
-    public final SimpleStringProperty bpm = new SimpleStringProperty();
+    private final SimpleStringProperty filename = new SimpleStringProperty();
+    private final SimpleStringProperty displayName = new SimpleStringProperty();
+    private final SimpleStringProperty bpm = new SimpleStringProperty();
 
-    public Info(String filename, String displayName, String bpm) {
-        setFilename(filename);
-        setDisplayName(displayName);
+    private final File file;
+
+    public Info(File file, String bpm) {
+        this.file = file;
+        setFilename(file.getAbsolutePath());
+        setDisplayName(file.getName());
         setBpm(bpm);
     }
 
@@ -52,5 +57,9 @@ public class Info {
 
     public void setBpm(String bpm) {
         this.bpm.set(bpm);
+    }
+
+    public File getFile() {
+        return file;
     }
 }

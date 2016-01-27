@@ -25,6 +25,7 @@ public class Main extends Application {
 
         stage.setTitle("Kitchen Sync");
         stage.setScene(new Scene(root, 300, 275));
+        stage.setResizable(false);
 
         stage.show();
     }

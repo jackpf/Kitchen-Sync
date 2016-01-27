@@ -15,19 +15,29 @@ public class Executor {
     }
 
     public void run(String[] args) throws IOException, InterruptedException {
-        StringBuilder sb = new StringBuilder(file);
-        for (String arg : args) {
-            sb.append(" \"" + arg.replaceAll("\"", "\\\"") + "\"");
+        //System.out.println("Executing: " + sb.toString());
+
+        String[] cmdArgs = new String[args.length + 1];
+        cmdArgs[0] = file;
+        for (int i = 0; i < args.length; i++) {
+            cmdArgs[i + 1] = args[i];
         }
 
-        Process p = Runtime.getRuntime().exec(sb.toString());
+        Process p = Runtime.getRuntime().exec(cmdArgs);
         p.waitFor();
 
-        BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
+        System.out.println("Done");
 
+        BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
         String line;
         while ((line = reader.readLine())!= null) {
-            System.out.println(line);
+            System.out.println("Output: " + line);
+        }
+
+        BufferedReader reader2 = new BufferedReader(new InputStreamReader(p.getErrorStream()));
+        String line2;
+        while ((line2 = reader2.readLine())!= null) {
+            System.out.println("Output: " + line2);
         }
     }
 }
