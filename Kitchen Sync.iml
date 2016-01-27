@@ -11,13 +11,5 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="Maven: org:jaudiotagger:2.0.3" level="project" />
-    <orderEntry type="library" name="Maven: com.github.rwl:jtransforms:2.4.0" level="project" />
-    <orderEntry type="library" name="Maven: junit:junit:4.8.2" level="project" />
-    <orderEntry type="library" name="Maven: it.sauronsoftware:it.sauronsoftware.jave:1.0.2" level="project" />
-    <orderEntry type="library" name="Maven: org.apache.commons:commons-math3:3.2" level="project" />
-    <orderEntry type="library" name="Maven: com.beust:jcommander:1.48" level="project" />
-    <orderEntry type="library" name="Maven: javazoom:jlayer:1.0.1" level="project" />
-    <orderEntry type="library" name="Maven: be.tarsos:be.tarsos.dsp:latest" level="project" />
   </component>
 </module>
