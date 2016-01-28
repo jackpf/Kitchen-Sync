@@ -20,7 +20,7 @@ JNIEXPORT jstring JNICALL Java_com_jackpf_kitchensync_CInterface_CInterface_getV
     return env->NewStringUTF(soundTouch.getVersionString());
 }
 
-JNIEXPORT jstring JNICALL Java_com_jackpf_kitchensync_CInterface_CInterface_getBpm
+JNIEXPORT jfloat JNICALL Java_com_jackpf_kitchensync_CInterface_CInterface_getBpm
   (JNIEnv *env, jobject obj, jstring jFilename)
 {
     float bpmValue, goalBPM = 130.0, tempoDelta;
@@ -66,7 +66,7 @@ JNIEXPORT jstring JNICALL Java_com_jackpf_kitchensync_CInterface_CInterface_getB
     else
     {
         fprintf(stderr, "Couldn't detect BPM rate.\n\n");
-        return nullptr;
+        return -1.0;
     }
 
     if (goalBPM > 0)
@@ -76,8 +76,11 @@ JNIEXPORT jstring JNICALL Java_com_jackpf_kitchensync_CInterface_CInterface_getB
         fprintf(stderr, "The file will be converted to %.1f BPM\n\n", goalBPM);
     }
 
-    char buf[64];
-    snprintf(buf, 64, "%.1f", bpmValue);
+    return (jfloat) bpmValue;
+}
 
-    return env->NewStringUTF(buf);
+JNIEXPORT void JNICALL Java_com_jackpf_kitchensync_CInterface_CInterface_setBpm
+  (JNIEnv *env, jobject obj, jstring jFilename, jfloat fromBpm, jfloat toBpm)
+{
+    printf("Not implemented yet\n");
 }

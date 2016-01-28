@@ -18,10 +18,18 @@ JNIEXPORT jstring JNICALL Java_com_jackpf_kitchensync_CInterface_CInterface_getV
 /*
  * Class:     com_jackpf_kitchensync_CInterface_CInterface
  * Method:    getBpm
- * Signature: (Ljava/lang/String;)Ljava/lang/String;
+ * Signature: (Ljava/lang/String;)F
  */
-JNIEXPORT jstring JNICALL Java_com_jackpf_kitchensync_CInterface_CInterface_getBpm
+JNIEXPORT jfloat JNICALL Java_com_jackpf_kitchensync_CInterface_CInterface_getBpm
   (JNIEnv *, jobject, jstring);
+
+/*
+ * Class:     com_jackpf_kitchensync_CInterface_CInterface
+ * Method:    setBpm
+ * Signature: (Ljava/lang/String;FF)V
+ */
+JNIEXPORT void JNICALL Java_com_jackpf_kitchensync_CInterface_CInterface_setBpm
+  (JNIEnv *, jobject, jstring, jfloat, jfloat);
 
 #ifdef __cplusplus
 }

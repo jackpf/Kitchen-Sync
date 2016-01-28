@@ -3,6 +3,7 @@ package com.jackpf.kitchensync;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Arrays;
 
 /**
  * Created by jackfarrelly on 24/01/2016.
@@ -10,23 +11,28 @@ import java.io.InputStreamReader;
 public class Executor {
     private String file;
 
-    public Executor(String file) {
+    public Executor(String file) throws Exception {
         this.file = file;
+
+        Process p = Runtime.getRuntime().exec("which " + file);
+        p.waitFor();
+        BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
+        if (reader.readLine() == null) {
+            throw new RuntimeException("Could not find ffmpeg binary, is it installed?");
+        }
     }
 
     public void run(String[] args) throws IOException, InterruptedException {
-        //System.out.println("Executing: " + sb.toString());
-
         String[] cmdArgs = new String[args.length + 1];
         cmdArgs[0] = file;
         for (int i = 0; i < args.length; i++) {
             cmdArgs[i + 1] = args[i];
         }
 
+        System.out.println("Executing: " + Arrays.toString(cmdArgs));
+
         Process p = Runtime.getRuntime().exec(cmdArgs);
         p.waitFor();
-
-        System.out.println("Done");
 
         BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
         String line;

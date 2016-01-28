@@ -5,8 +5,13 @@ import javafx.concurrent.WorkerStateEvent;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.TextFieldTableCell;
+import javafx.scene.input.DragEvent;
+import javafx.scene.input.Dragboard;
+import javafx.scene.input.TransferMode;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
@@ -21,6 +26,8 @@ import java.util.Optional;
  */
 public class Controller {
     private Stage stage;
+
+    private Parent root;
 
     @FXML
     private TableView<Info> tracks;
@@ -37,7 +44,7 @@ public class Controller {
     @FXML
     private Button runButton;
 
-    public void initialise(Stage stage) {
+    public void initialise(Parent root, Stage stage) {
         this.stage = stage;
         bpm.setCellFactory(TextFieldTableCell.<Info>forTableColumn());
         bpm.setOnEditCommit(new EventHandler<TableColumn.CellEditEvent<Info, String>>() {
@@ -46,6 +53,38 @@ public class Controller {
                 enableRunButtonIfReady();
             }
         });
+
+        stage.setTitle("Kitchen Sync");
+        stage.setScene(new Scene(root, 300, 275));
+        stage.setResizable(false);
+
+        stage.getScene().setOnDragOver(new EventHandler<DragEvent>() {
+            public void handle(DragEvent event) {
+                Dragboard db = event.getDragboard();
+                if (db.hasFiles()) {
+                    event.acceptTransferModes(TransferMode.COPY);
+                } else {
+                    event.consume();
+                }
+            }
+        });
+        stage.getScene().setOnDragDropped(new EventHandler<DragEvent>() {
+            public void handle(DragEvent event) {
+                Dragboard db = event.getDragboard();
+                boolean success = false;
+                if (db.hasFiles()) {
+                    success = true;
+                    String filePath = null;
+                    for (File file : db.getFiles()) {
+                        addTrack(file);
+                    }
+                }
+                event.setDropCompleted(success);
+                event.consume();
+            }
+        });
+
+        stage.show();
     }
 
     protected void enableRunButtonIfReady() {
@@ -54,7 +93,7 @@ public class Controller {
 
         try {
             for (Info track : data) {
-                Integer.parseInt(track.getBpm());
+                Float.parseFloat(track.getBpm());
             }
         } catch (NumberFormatException e) {
             isRunnable = false;
@@ -74,19 +113,28 @@ public class Controller {
             data.add(trackInfo);
         }
 
-        final AnalyzerService analyzer = new AnalyzerService(trackInfo);
+        try {
+            final AnalyserService analyzer = new AnalyserService(trackInfo);
 
-        progressIndicator.visibleProperty().bind(analyzer.runningProperty());
-        analyzer.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
-            public void handle(WorkerStateEvent workerStateEvent) {
-                String bpm = analyzer.getValue();
-                trackInfo.setBpm(bpm);
+            progressIndicator.visibleProperty().bind(analyzer.runningProperty());
+            analyzer.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
+                public void handle(WorkerStateEvent workerStateEvent) {
+                    float bpm = analyzer.getValue();
+                    trackInfo.setBpm(String.format("%.1f", bpm));
 
-                enableRunButtonIfReady();
-            }
-        });
+                    enableRunButtonIfReady();
+                }
+            });
+            analyzer.setOnFailed(new EventHandler<WorkerStateEvent>() {
+                public void handle(WorkerStateEvent workerStateEvent) {
+                    workerStateEvent.getSource().getException().printStackTrace();
+                }
+            });
 
-        analyzer.start();
+            analyzer.start();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @FXML
@@ -116,16 +164,25 @@ public class Controller {
             if (dir != null) {
                 final ObservableList<Info> data = tracks.getItems();
                 for (Info info : data) {
-                    final ProcessorService processor = new ProcessorService(info, Integer.parseInt(result.get()), dir);
+                    try {
+                        final ProcessorService processor = new ProcessorService(info, Integer.parseInt(result.get()), dir);
 
-                    progressIndicator.visibleProperty().bind(processor.runningProperty());
-                    processor.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
-                        public void handle(WorkerStateEvent workerStateEvent) {
-                            Info track = processor.getValue();
-                            data.remove(track);
-                        }
-                    });
-                    processor.start();
+                        progressIndicator.visibleProperty().bind(processor.runningProperty());
+                        processor.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
+                            public void handle(WorkerStateEvent workerStateEvent) {
+                                Info track = processor.getValue();
+                                data.remove(track);
+                            }
+                        });
+                        processor.setOnFailed(new EventHandler<WorkerStateEvent>() {
+                            public void handle(WorkerStateEvent workerStateEvent) {
+                                workerStateEvent.getSource().getException().printStackTrace();
+                            }
+                        });
+                        processor.start();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         }

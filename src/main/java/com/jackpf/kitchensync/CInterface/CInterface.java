@@ -5,7 +5,8 @@ package com.jackpf.kitchensync.CInterface;
  */
 public class CInterface {
     public native String getVersion();
-    public native String getBpm(String filename);
+    public native float getBpm(String filename);
+    public native void setBpm(String filename, float fromBpm, float toBpm);
 
     static {
         System.loadLibrary("kitchensync");
