@@ -1,1 +1,0 @@
-g++ /usr/local/lib/libSoundTouch.dylib -o soundtouch.so -shared "-I/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/include/" "-I/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/include/darwin" "-I/usr/local/include/" CInterface.cpp

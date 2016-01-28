@@ -4,7 +4,7 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
-  "/Users/jackfarrelly/Workspace/Techno Sync/src/main/CInterface/CInterface.cpp" "/Users/jackfarrelly/Workspace/Techno Sync/src/main/CInterface/build/CMakeFiles/soundtouch.so.dir/CInterface.cpp.o"
+  "/Users/jackfarrelly/Workspace/Techno Sync/src/main/CInterface/CInterface.cpp" "/Users/jackfarrelly/Workspace/Techno Sync/src/main/CInterface/build/CMakeFiles/libsoundtouch.dylib.dir/CInterface.cpp.o"
   )
 set(CMAKE_CXX_COMPILER_ID "Clang")
 

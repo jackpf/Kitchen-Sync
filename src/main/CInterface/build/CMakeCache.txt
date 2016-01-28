@@ -185,6 +185,12 @@ KitchenSync_BINARY_DIR:STATIC=/Users/jackfarrelly/Workspace/Techno Sync/src/main
 //Value Computed by CMake
 KitchenSync_SOURCE_DIR:STATIC=/Users/jackfarrelly/Workspace/Techno Sync/src/main/CInterface
 
+//Dependencies for target
+libkitchensync.dylib_LIB_DEPENDS:STATIC=
+
+//Dependencies for target
+libsoundtouch.dylib_LIB_DEPENDS:STATIC=
+
 
 ########################
 # INTERNAL cache entries

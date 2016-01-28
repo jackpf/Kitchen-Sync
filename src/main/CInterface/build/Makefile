@@ -155,17 +155,17 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named soundtouch.so
+# Target rules for targets named libkitchensync.dylib
 
 # Build rule for target.
-soundtouch.so: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 soundtouch.so
-.PHONY : soundtouch.so
+libkitchensync.dylib: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 libkitchensync.dylib
+.PHONY : libkitchensync.dylib
 
 # fast build rule for target.
-soundtouch.so/fast:
-	$(MAKE) -f CMakeFiles/soundtouch.so.dir/build.make CMakeFiles/soundtouch.so.dir/build
-.PHONY : soundtouch.so/fast
+libkitchensync.dylib/fast:
+	$(MAKE) -f CMakeFiles/libkitchensync.dylib.dir/build.make CMakeFiles/libkitchensync.dylib.dir/build
+.PHONY : libkitchensync.dylib/fast
 
 CInterface.o: CInterface.cpp.o
 
@@ -173,7 +173,7 @@ CInterface.o: CInterface.cpp.o
 
 # target to build an object file
 CInterface.cpp.o:
-	$(MAKE) -f CMakeFiles/soundtouch.so.dir/build.make CMakeFiles/soundtouch.so.dir/CInterface.cpp.o
+	$(MAKE) -f CMakeFiles/libkitchensync.dylib.dir/build.make CMakeFiles/libkitchensync.dylib.dir/CInterface.cpp.o
 .PHONY : CInterface.cpp.o
 
 CInterface.i: CInterface.cpp.i
@@ -182,7 +182,7 @@ CInterface.i: CInterface.cpp.i
 
 # target to preprocess a source file
 CInterface.cpp.i:
-	$(MAKE) -f CMakeFiles/soundtouch.so.dir/build.make CMakeFiles/soundtouch.so.dir/CInterface.cpp.i
+	$(MAKE) -f CMakeFiles/libkitchensync.dylib.dir/build.make CMakeFiles/libkitchensync.dylib.dir/CInterface.cpp.i
 .PHONY : CInterface.cpp.i
 
 CInterface.s: CInterface.cpp.s
@@ -191,7 +191,7 @@ CInterface.s: CInterface.cpp.s
 
 # target to generate assembly for a file
 CInterface.cpp.s:
-	$(MAKE) -f CMakeFiles/soundtouch.so.dir/build.make CMakeFiles/soundtouch.so.dir/CInterface.cpp.s
+	$(MAKE) -f CMakeFiles/libkitchensync.dylib.dir/build.make CMakeFiles/libkitchensync.dylib.dir/CInterface.cpp.s
 .PHONY : CInterface.cpp.s
 
 # Help Target
@@ -206,7 +206,7 @@ help:
 	@echo "... install"
 	@echo "... install/strip"
 	@echo "... install/local"
-	@echo "... soundtouch.so"
+	@echo "... libkitchensync.dylib"
 	@echo "... CInterface.o"
 	@echo "... CInterface.i"
 	@echo "... CInterface.s"

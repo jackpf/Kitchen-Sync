@@ -29,18 +29,21 @@ endif()
 
 if(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified")
   list(APPEND CMAKE_ABSOLUTE_DESTINATION_FILES
-   "/usr/local/lib/soundtouch.so")
+   "/usr/local/lib/libkitchensync.dylib")
   if(CMAKE_WARN_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(WARNING "ABSOLUTE path INSTALL DESTINATION : ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
   if(CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(FATAL_ERROR "ABSOLUTE path INSTALL DESTINATION forbidden (by caller): ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
-file(INSTALL DESTINATION "/usr/local/lib" TYPE EXECUTABLE FILES "/Users/jackfarrelly/Workspace/Techno Sync/src/main/CInterface/bin/soundtouch.so")
-  if(EXISTS "$ENV{DESTDIR}/usr/local/lib/soundtouch.so" AND
-     NOT IS_SYMLINK "$ENV{DESTDIR}/usr/local/lib/soundtouch.so")
+file(INSTALL DESTINATION "/usr/local/lib" TYPE EXECUTABLE FILES "/Users/jackfarrelly/Workspace/Techno Sync/src/main/CInterface/libkitchensync.dylib")
+  if(EXISTS "$ENV{DESTDIR}/usr/local/lib/libkitchensync.dylib" AND
+     NOT IS_SYMLINK "$ENV{DESTDIR}/usr/local/lib/libkitchensync.dylib")
+    execute_process(COMMAND /usr/bin/install_name_tool
+      -delete_rpath "/usr/local/lib"
+      "$ENV{DESTDIR}/usr/local/lib/libkitchensync.dylib")
     if(CMAKE_INSTALL_DO_STRIP)
-      execute_process(COMMAND "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/strip" "$ENV{DESTDIR}/usr/local/lib/soundtouch.so")
+      execute_process(COMMAND "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/strip" "$ENV{DESTDIR}/usr/local/lib/libkitchensync.dylib")
     endif()
   endif()
 endif()

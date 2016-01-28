@@ -1,1 +1,1 @@
-/Users/jackfarrelly/Workspace/Techno Sync/src/main/CInterface/build/CMakeFiles/soundtouch.so.dir
+/Users/jackfarrelly/Workspace/Techno Sync/src/main/CInterface/build/CMakeFiles/libkitchensync.dylib.dir

@@ -23,6 +23,12 @@ stdio.h
 -
 soundtouch/SoundTouch.h
 -
+CInterface.h
+/Users/jackfarrelly/Workspace/Techno Sync/src/main/CInterface/CInterface.h
+
+/Users/jackfarrelly/Workspace/Techno Sync/src/main/CInterface/CInterface.h
+jni.h
+-
 
 /usr/local/include/soundtouch/FIFOSamplePipe.h
 assert.h

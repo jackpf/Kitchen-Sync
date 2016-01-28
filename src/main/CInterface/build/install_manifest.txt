@@ -1,1 +1,1 @@
-/usr/local/lib/soundtouch.so
+/usr/local/lib/liblibkitchensync.dylib.a

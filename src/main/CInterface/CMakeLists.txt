@@ -7,14 +7,17 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -shared")
 
 include_directories(
     /usr/local/include/
-    /Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/include/darwin
     /Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/include/
+    /Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/include/darwin/
+)
+link_directories(
+    /usr/local/lib/
 )
 
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin/")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}")
 
-add_executable(soundtouch.so /usr/local/lib/libSoundTouch.dylib CInterface.cpp)
-#target_link_libraries(soundtouch.so)
+add_executable(libkitchensync.dylib CInterface.cpp)
+target_link_libraries(libkitchensync.dylib SoundTouch)
 
 # Install targets
-install(TARGETS soundtouch.so DESTINATION /usr/local/lib/)
+install(TARGETS libkitchensync.dylib DESTINATION /usr/local/lib/)

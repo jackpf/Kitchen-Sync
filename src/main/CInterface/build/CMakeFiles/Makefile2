@@ -60,39 +60,39 @@ CMAKE_SOURCE_DIR = "/Users/jackfarrelly/Workspace/Techno Sync/src/main/CInterfac
 CMAKE_BINARY_DIR = "/Users/jackfarrelly/Workspace/Techno Sync/src/main/CInterface/build"
 
 #=============================================================================
-# Target rules for target CMakeFiles/soundtouch.so.dir
+# Target rules for target CMakeFiles/libkitchensync.dylib.dir
 
 # All Build rule for target.
-CMakeFiles/soundtouch.so.dir/all:
-	$(MAKE) -f CMakeFiles/soundtouch.so.dir/build.make CMakeFiles/soundtouch.so.dir/depend
-	$(MAKE) -f CMakeFiles/soundtouch.so.dir/build.make CMakeFiles/soundtouch.so.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir="/Users/jackfarrelly/Workspace/Techno Sync/src/main/CInterface/build/CMakeFiles" --progress-num=1,2 "Built target soundtouch.so"
-.PHONY : CMakeFiles/soundtouch.so.dir/all
+CMakeFiles/libkitchensync.dylib.dir/all:
+	$(MAKE) -f CMakeFiles/libkitchensync.dylib.dir/build.make CMakeFiles/libkitchensync.dylib.dir/depend
+	$(MAKE) -f CMakeFiles/libkitchensync.dylib.dir/build.make CMakeFiles/libkitchensync.dylib.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir="/Users/jackfarrelly/Workspace/Techno Sync/src/main/CInterface/build/CMakeFiles" --progress-num=1,2 "Built target libkitchensync.dylib"
+.PHONY : CMakeFiles/libkitchensync.dylib.dir/all
 
 # Include target in all.
-all: CMakeFiles/soundtouch.so.dir/all
+all: CMakeFiles/libkitchensync.dylib.dir/all
 
 .PHONY : all
 
 # Build rule for subdir invocation for target.
-CMakeFiles/soundtouch.so.dir/rule: cmake_check_build_system
+CMakeFiles/libkitchensync.dylib.dir/rule: cmake_check_build_system
 	$(CMAKE_COMMAND) -E cmake_progress_start "/Users/jackfarrelly/Workspace/Techno Sync/src/main/CInterface/build/CMakeFiles" 2
-	$(MAKE) -f CMakeFiles/Makefile2 CMakeFiles/soundtouch.so.dir/all
+	$(MAKE) -f CMakeFiles/Makefile2 CMakeFiles/libkitchensync.dylib.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start "/Users/jackfarrelly/Workspace/Techno Sync/src/main/CInterface/build/CMakeFiles" 0
-.PHONY : CMakeFiles/soundtouch.so.dir/rule
+.PHONY : CMakeFiles/libkitchensync.dylib.dir/rule
 
 # Convenience name for target.
-soundtouch.so: CMakeFiles/soundtouch.so.dir/rule
+libkitchensync.dylib: CMakeFiles/libkitchensync.dylib.dir/rule
 
-.PHONY : soundtouch.so
-
-# clean rule for target.
-CMakeFiles/soundtouch.so.dir/clean:
-	$(MAKE) -f CMakeFiles/soundtouch.so.dir/build.make CMakeFiles/soundtouch.so.dir/clean
-.PHONY : CMakeFiles/soundtouch.so.dir/clean
+.PHONY : libkitchensync.dylib
 
 # clean rule for target.
-clean: CMakeFiles/soundtouch.so.dir/clean
+CMakeFiles/libkitchensync.dylib.dir/clean:
+	$(MAKE) -f CMakeFiles/libkitchensync.dylib.dir/build.make CMakeFiles/libkitchensync.dylib.dir/clean
+.PHONY : CMakeFiles/libkitchensync.dylib.dir/clean
+
+# clean rule for target.
+clean: CMakeFiles/libkitchensync.dylib.dir/clean
 
 .PHONY : clean
 

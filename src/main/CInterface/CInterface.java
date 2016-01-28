@@ -5,7 +5,7 @@ public class CInterface {
     private native String getBpm();
 
     static {
-        System.loadLibrary("soundtouch");
+        System.loadLibrary("kitchensync");
     }
 
     public static void main(String[] args) {
