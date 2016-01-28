@@ -49,7 +49,11 @@ public class Controller {
         bpm.setCellFactory(TextFieldTableCell.<Info>forTableColumn());
         bpm.setOnEditCommit(new EventHandler<TableColumn.CellEditEvent<Info, String>>() {
             public void handle(TableColumn.CellEditEvent<Info, String> event) {
-                event.getRowValue().setBpm(event.getNewValue());
+                try {
+                    event.getRowValue().setBpm(String.format("%.1f", Float.parseFloat(event.getNewValue())));
+                } catch (NumberFormatException e) {
+                    event.getRowValue().setBpm(event.getNewValue());
+                }
                 enableRunButtonIfReady();
             }
         });
@@ -103,6 +107,39 @@ public class Controller {
         runButton.setDisable(!isRunnable);
     }
 
+    protected void updateOutliers() {
+        ObservableList<Info> data = tracks.getItems();
+        final String ATN_STR = " - ?";
+
+        float totalBpm = 0;
+        int count = 0;
+
+        for (Info track : data) {
+            try {
+                totalBpm += Float.parseFloat(track.getBpm());
+                count++;
+            } catch (NumberFormatException e) {
+                continue;
+            }
+        }
+
+        float avg = totalBpm / count;
+
+        for (Info track : data) {
+            try {
+                float bpm = Float.parseFloat(track.getBpm());
+
+                if ((bpm > avg + avg * 0.1 || bpm < avg - avg * 0.1) && !track.getBpm().contains(ATN_STR)) {
+                    track.setBpm(track.getBpm() + ATN_STR);
+                } else if (track.getBpm().contains(ATN_STR)) {
+                    track.setBpm(track.getBpm().replace(ATN_STR, ""));
+                }
+            } catch (NumberFormatException e) {
+                continue;
+            }
+        }
+    }
+
     protected void addTrack(File file) {
         final ObservableList<Info> data = tracks.getItems();
 
@@ -127,6 +164,7 @@ public class Controller {
                     trackInfo.setBpm(String.format("%.1f", bpm));
 
                     enableRunButtonIfReady();
+                    updateOutliers();
                 }
             });
             analyzer.setOnFailed(new EventHandler<WorkerStateEvent>() {
