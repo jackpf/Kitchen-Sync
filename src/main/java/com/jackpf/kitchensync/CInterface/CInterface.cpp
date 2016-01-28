@@ -4,7 +4,7 @@
 #include <soundtouch/SoundTouch.h>
 #include <soundtouch/BPMDetect.h>
 
-#include "CInterface.h"
+#include "com_jackpf_kitchensync_CInterface_CInterface.h"
 #include "WavFile.h"
 
 using namespace soundtouch;
@@ -14,13 +14,13 @@ using namespace soundtouch;
 
 SoundTouch soundTouch;
 
-JNIEXPORT jstring JNICALL Java_CInterface_getVersion
+JNIEXPORT jstring JNICALL Java_com_jackpf_kitchensync_CInterface_CInterface_getVersion
   (JNIEnv *env, jobject obj)
 {
     return env->NewStringUTF(soundTouch.getVersionString());
 }
 
-JNIEXPORT jstring JNICALL Java_CInterface_getBpm
+JNIEXPORT jstring JNICALL Java_com_jackpf_kitchensync_CInterface_CInterface_getBpm
   (JNIEnv *env, jobject obj, jstring jFilename)
 {
     float bpmValue, goalBPM = 130.0, tempoDelta;

@@ -1,6 +1,5 @@
 package com.jackpf.kitchensync;
 
-import TrackAnalyzer.TrackAnalyzer;
 import javafx.collections.ObservableList;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.event.ActionEvent;
@@ -67,7 +66,7 @@ public class Controller {
     protected void addTrack(File file) {
         final ObservableList<Info> data = tracks.getItems();
 
-        Info trackInfo = new Info(file, Info.NO_BPM);
+        final Info trackInfo = new Info(file, Info.NO_BPM);
 
         if (data.contains(trackInfo)) {
             return;
@@ -80,13 +79,8 @@ public class Controller {
         progressIndicator.visibleProperty().bind(analyzer.runningProperty());
         analyzer.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
             public void handle(WorkerStateEvent workerStateEvent) {
-                TrackAnalyzer.Info info = analyzer.getValue();
-
-                for (Info track : data) {
-                    if (track.getFilename().equals(info.filename)) {
-                        track.setBpm(Integer.toString(info.bpm));
-                    }
-                }
+                String bpm = analyzer.getValue();
+                trackInfo.setBpm(bpm);
 
                 enableRunButtonIfReady();
             }

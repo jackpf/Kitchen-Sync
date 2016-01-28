@@ -1,3 +1,3 @@
 .DS_Store
 target/
-src/main/CInterface/build/
+src/main/java/com/jackpf/kitchensync/CInterface/build

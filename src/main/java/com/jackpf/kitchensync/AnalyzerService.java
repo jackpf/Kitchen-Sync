@@ -1,6 +1,6 @@
 package com.jackpf.kitchensync;
 
-import TrackAnalyzer.TrackAnalyzer;
+import com.jackpf.kitchensync.CInterface.CInterface;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import sun.awt.Mutex;
@@ -8,8 +8,10 @@ import sun.awt.Mutex;
 /**
  * Created by jackfarrelly on 26/01/2016.
  */
-public class AnalyzerService extends Service<TrackAnalyzer.Info> {
+public class AnalyzerService extends Service<String> {
     private static final Mutex mutex = new Mutex();
+
+    private CInterface cInterface = new CInterface();
 
     private final Info trackInfo;
 
@@ -18,15 +20,14 @@ public class AnalyzerService extends Service<TrackAnalyzer.Info> {
     }
 
     @Override
-    protected Task<TrackAnalyzer.Info> createTask() {
-        return new Task<TrackAnalyzer.Info>() {
+    protected Task<String> createTask() {
+        return new Task<String>() {
             @Override
-            protected TrackAnalyzer.Info call() throws Exception {
+            protected String call() throws Exception {
                 mutex.lock();
-                TrackAnalyzer analyzer = new TrackAnalyzer(new String[]{trackInfo.getFilename(), "-w", "-o", "/tmp/trackanalyzer.txt"});
-                TrackAnalyzer.Info info = analyzer.analyzeTrack(trackInfo.getFilename(), false);
+                String bpm = cInterface.getBpm(trackInfo.getFilename());
                 mutex.unlock();
-                return info;
+                return bpm;
             }
         };
     }
