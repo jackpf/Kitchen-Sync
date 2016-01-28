@@ -73,10 +73,11 @@ public class Controller {
                 Dragboard db = event.getDragboard();
                 boolean success = false;
                 if (db.hasFiles()) {
-                    success = true;
-                    String filePath = null;
                     for (File file : db.getFiles()) {
-                        addTrack(file);
+                        if (file.getName().toLowerCase().endsWith(".mp3") || file.getName().toLowerCase().endsWith(".wav")) {
+                            addTrack(file);
+                            success = true;
+                        }
                     }
                 }
                 event.setDropCompleted(success);
@@ -107,11 +108,14 @@ public class Controller {
 
         final Info trackInfo = new Info(file, Info.NO_BPM);
 
-        if (data.contains(trackInfo)) {
-            return;
-        } else {
-            data.add(trackInfo);
+        // Needs to check filename instead
+        for (Info track : data) {
+            if (track.getFilename().equals(trackInfo.getFilename())) {
+                return;
+            }
         }
+
+        data.add(trackInfo);
 
         try {
             final AnalyserService analyzer = new AnalyserService(trackInfo);
