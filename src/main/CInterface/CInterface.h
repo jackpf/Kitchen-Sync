@@ -9,11 +9,19 @@ extern "C" {
 #endif
 /*
  * Class:     CInterface
- * Method:    getBpm
+ * Method:    getVersion
  * Signature: ()Ljava/lang/String;
  */
-JNIEXPORT jstring JNICALL Java_CInterface_getBpm
+JNIEXPORT jstring JNICALL Java_CInterface_getVersion
   (JNIEnv *, jobject);
+
+/*
+ * Class:     CInterface
+ * Method:    getBpm
+ * Signature: (Ljava/lang/String;)Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL Java_CInterface_getBpm
+  (JNIEnv *, jobject, jstring);
 
 #ifdef __cplusplus
 }

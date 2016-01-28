@@ -2,7 +2,8 @@
  * Created by jackfarrelly on 27/01/2016.
  */
 public class CInterface {
-    private native String getBpm();
+    private native String getVersion();
+    private native String getBpm(String filename);
 
     static {
         System.loadLibrary("kitchensync");
@@ -10,7 +11,9 @@ public class CInterface {
 
     public static void main(String[] args) {
         CInterface cInterface = new CInterface();
-        String bpm = cInterface.getBpm();
-        System.out.println("bpm = " + bpm);
+
+        String version = cInterface.getVersion();
+        System.out.println("Soundtouch lib version: " + version);
+        System.out.println("BPM of /tmp/tmp.wav: " + cInterface.getBpm("/tmp/tmp.wav"));
     }
 }

@@ -9,6 +9,7 @@ include_directories(
     /usr/local/include/
     /Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/include/
     /Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/include/darwin/
+    "${PROJECT_SOURCE_DIR}/include/"
 )
 link_directories(
     /usr/local/lib/
@@ -16,7 +17,7 @@ link_directories(
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}")
 
-add_executable(libkitchensync.dylib CInterface.cpp)
+add_executable(libkitchensync.dylib CInterface.cpp include/WavFile.cpp)
 target_link_libraries(libkitchensync.dylib SoundTouch)
 
 # Install targets
