@@ -6,21 +6,28 @@ package com.jackpf.kitchensync.CInterface;
 public class CInterface {
     public native String getVersion();
     public native float getBpm(String filename);
-    public native void setBpm(String filename, float fromBpm, float toBpm);
+    public native void setBpm(String inFilename, String outFilename, float fromBpm, float toBpm);
 
     static {
         System.loadLibrary("kitchensync");
     }
 
     public static void main(String[] args) {
-        if (args.length < 1) {
-            throw new RuntimeException("Not enough args");
+        if (args.length < 3) {
+            throw new RuntimeException("Usage: CInterface <inFile> <outFile> <targetBpm>");
         }
 
         CInterface cInterface = new CInterface();
 
         String version = cInterface.getVersion();
         System.out.println("Soundtouch lib version: " + version);
-        System.out.println("BPM of " + args[0] + ": "  + cInterface.getBpm(args[0]));
+
+        float bpm = cInterface.getBpm(args[0]);
+
+        System.out.println("BPM of " + args[0] + ": "  + bpm);
+
+        cInterface.setBpm(args[0], args[1], bpm, Float.parseFloat(args[2]));
+
+        System.out.println("Done");
     }
 }

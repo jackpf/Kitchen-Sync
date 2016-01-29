@@ -26,10 +26,10 @@ JNIEXPORT jfloat JNICALL Java_com_jackpf_kitchensync_CInterface_CInterface_getBp
 /*
  * Class:     com_jackpf_kitchensync_CInterface_CInterface
  * Method:    setBpm
- * Signature: (Ljava/lang/String;FF)V
+ * Signature: (Ljava/lang/String;Ljava/lang/String;FF)V
  */
 JNIEXPORT void JNICALL Java_com_jackpf_kitchensync_CInterface_CInterface_setBpm
-  (JNIEnv *, jobject, jstring, jfloat, jfloat);
+  (JNIEnv *, jobject, jstring, jstring, jfloat, jfloat);
 
 #ifdef __cplusplus
 }

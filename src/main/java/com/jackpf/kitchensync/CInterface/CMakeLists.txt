@@ -4,6 +4,7 @@ cmake_minimum_required(VERSION 2.8.4)
 project(KitchenSync)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -shared")
+add_definitions("-Wall")
 
 include_directories(
     /usr/local/include/
@@ -17,7 +18,7 @@ link_directories(
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}")
 
-add_executable(libkitchensync.dylib CInterface.cpp include/WavFile.cpp)
+add_executable(libkitchensync.dylib CInterface.cpp KitchenSync.cpp include/WavFile.cpp)
 target_link_libraries(libkitchensync.dylib SoundTouch)
 
 # Install targets

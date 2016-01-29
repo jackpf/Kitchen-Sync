@@ -1,86 +1,35 @@
 #include <jni.h>
 #include <stdio.h>
 
-#include <soundtouch/SoundTouch.h>
-#include <soundtouch/BPMDetect.h>
-
 #include "com_jackpf_kitchensync_CInterface_CInterface.h"
-#include "WavFile.h"
-
-using namespace soundtouch;
-
-// Processing chunk size (size chosen to be divisible by 2, 4, 6, 8, 10, 12, 14, 16 channels ...)
-#define BUFF_SIZE           6720
-
-SoundTouch soundTouch;
+#include "KitchenSync.h"
 
 JNIEXPORT jstring JNICALL Java_com_jackpf_kitchensync_CInterface_CInterface_getVersion
   (JNIEnv *env, jobject obj)
 {
-    return env->NewStringUTF(soundTouch.getVersionString());
+    return env->NewStringUTF(KitchenSync::getVersion());
 }
 
 JNIEXPORT jfloat JNICALL Java_com_jackpf_kitchensync_CInterface_CInterface_getBpm
   (JNIEnv *env, jobject obj, jstring jFilename)
 {
-    float bpmValue, goalBPM = 130.0, tempoDelta;
-    int nChannels;
     const char *filename = env->GetStringUTFChars(jFilename, 0);
-    WavInFile *inFile = new WavInFile(filename);
+
+    float bpm = KitchenSync::getBpm(filename);
+
     env->ReleaseStringUTFChars(jFilename, filename);
-    BPMDetect bpm(inFile->getNumChannels(), inFile->getSampleRate());
-    SAMPLETYPE sampleBuffer[BUFF_SIZE];
 
-    // detect bpm rate
-    fprintf(stderr, "Detecting BPM rate...");
-    fflush(stderr);
-
-    nChannels = (int)inFile->getNumChannels();
-    assert(BUFF_SIZE % nChannels == 0);
-
-    // Process the 'inFile' in small blocks, repeat until whole file has
-    // been processed
-    while (inFile->eof() == 0)
-    {
-        int num, samples;
-
-        // Read sample data from input file
-        num = inFile->read(sampleBuffer, BUFF_SIZE);
-
-        // Enter the new samples to the bpm analyzer class
-        samples = num / nChannels;
-        bpm.inputSamples(sampleBuffer, samples);
-    }
-
-    // Now the whole song data has been analyzed. Read the resulting bpm.
-    bpmValue = bpm.getBpm();
-    fprintf(stderr, "Done!\n");
-
-    // rewind the file after bpm detection
-    inFile->rewind();
-
-    if (bpmValue > 0)
-    {
-        fprintf(stderr, "Detected BPM rate %.1f\n\n", bpmValue);
-    }
-    else
-    {
-        fprintf(stderr, "Couldn't detect BPM rate.\n\n");
-        return -1.0;
-    }
-
-    if (goalBPM > 0)
-    {
-        // adjust tempo to given bpm
-        tempoDelta = (goalBPM / bpmValue - 1.0f) * 100.0f;
-        fprintf(stderr, "The file will be converted to %.1f BPM\n\n", goalBPM);
-    }
-
-    return (jfloat) bpmValue;
+    return (jfloat) bpm;
 }
 
 JNIEXPORT void JNICALL Java_com_jackpf_kitchensync_CInterface_CInterface_setBpm
-  (JNIEnv *env, jobject obj, jstring jFilename, jfloat fromBpm, jfloat toBpm)
+  (JNIEnv *env, jobject obj, jstring jInFilename, jstring jOutFilename, jfloat fromBpm, jfloat toBpm)
 {
-    printf("Not implemented yet\n");
+    const char *inFilename = env->GetStringUTFChars(jInFilename, 0);
+    const char *outFilename = env->GetStringUTFChars(jOutFilename, 0);
+
+    KitchenSync::setBpm(inFilename, outFilename, (float) fromBpm, (float) toBpm);
+
+    env->ReleaseStringUTFChars(jInFilename, inFilename);
+    env->ReleaseStringUTFChars(jOutFilename, outFilename);
 }
