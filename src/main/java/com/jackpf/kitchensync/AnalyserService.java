@@ -34,15 +34,13 @@ public class AnalyserService extends Service<Float> {
             protected Float call() throws Exception {
                 mutex.lock();
 
-                ffmpeg.run(new String[]{"-y", "-i", trackInfo.getFilename(), TMP_FILE.getAbsolutePath()});
+                ffmpeg.run(new String[]{"-y", "-i", trackInfo.getFile().getAbsolutePath(), TMP_FILE.getAbsolutePath()});
 
                 if (!TMP_FILE.exists()) {
                     throw new IOException("File " + TMP_FILE.getAbsolutePath() + " does not exist");
                 }
 
                 float bpm = cInterface.getBpm(TMP_FILE.getAbsolutePath());
-
-                System.out.println("Raw bpm: " + bpm);
 
                 TMP_FILE.delete();
 

@@ -1,6 +1,7 @@
 package com.jackpf.kitchensync;
 
 import javafx.beans.property.SimpleStringProperty;
+import javafx.concurrent.Service;
 
 import java.io.File;
 
@@ -15,6 +16,8 @@ public class Info {
     private final SimpleStringProperty bpm = new SimpleStringProperty();
 
     private final File file;
+
+    private Service service;
 
     public Info(File file, String bpm) {
         this.file = file;
@@ -61,5 +64,13 @@ public class Info {
 
     public File getFile() {
         return file;
+    }
+
+    public Service getService() {
+        return service;
+    }
+
+    public void setService(Service service) {
+        this.service = service;
     }
 }

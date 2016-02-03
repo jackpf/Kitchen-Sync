@@ -2,6 +2,7 @@
 <?import javafx.scene.control.cell.PropertyValueFactory?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?language javascript?>
 
 <GridPane fx:controller="com.jackpf.kitchensync.Controller"
           xmlns:fx="http://javafx.com/fxml" alignment="center" hgap="10" vgap="10">
@@ -14,7 +15,8 @@
                 <children>
                     <HBox spacing="10">
                         <children>
-                            <Button fx:id="addButton" text="Add files" onAction="#addFiles" prefWidth="100" prefHeight="25"/>
+                            <Button fx:id="addButton" text="+" onAction="#addFiles" prefWidth="50" prefHeight="25"/>
+                            <Button fx:id="removeButton" text="-" onAction="#removeFiles" prefWidth="50" prefHeight="25" disable="true"/>
                             <Button fx:id="runButton" text="Run" onAction="#run" prefWidth="75" prefHeight="25" disable="true"/>
                         </children>
                     </HBox>
@@ -40,6 +42,9 @@
                     </TableColumn>
                 </columns>
             </TableView>
+            <fx:script>
+                tracks.getSelectionModel().setSelectionMode(javafx.scene.control.SelectionMode.MULTIPLE);
+            </fx:script>
         </children>
     </VBox>
 </GridPane>

@@ -1,5 +1,6 @@
 package com.jackpf.kitchensync;
 
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.event.ActionEvent;
@@ -33,6 +34,9 @@ public class Controller {
     private TableView<Info> tracks;
 
     @FXML
+    private TableColumn filename;
+
+    @FXML
     private TableColumn bpm;
 
     @FXML
@@ -44,19 +48,11 @@ public class Controller {
     @FXML
     private Button runButton;
 
+    @FXML
+    private Button removeButton;
+
     public void initialise(Parent root, Stage stage) {
         this.stage = stage;
-        bpm.setCellFactory(TextFieldTableCell.<Info>forTableColumn());
-        bpm.setOnEditCommit(new EventHandler<TableColumn.CellEditEvent<Info, String>>() {
-            public void handle(TableColumn.CellEditEvent<Info, String> event) {
-                try {
-                    event.getRowValue().setBpm(String.format("%.1f", Float.parseFloat(event.getNewValue())));
-                } catch (NumberFormatException e) {
-                    event.getRowValue().setBpm(event.getNewValue());
-                }
-                enableRunButtonIfReady();
-            }
-        });
 
         stage.setTitle("Kitchen Sync");
         stage.setScene(new Scene(root, 300, 275));
@@ -87,6 +83,28 @@ public class Controller {
                 event.setDropCompleted(success);
                 event.consume();
             }
+        });
+
+        bpm.setCellFactory(TextFieldTableCell.<Info>forTableColumn());
+        bpm.setOnEditCommit(new EventHandler<TableColumn.CellEditEvent<Info, String>>() {
+            public void handle(TableColumn.CellEditEvent<Info, String> event) {
+                try {
+                    event.getRowValue().setBpm(String.format("%.1f", Float.parseFloat(event.getNewValue())));
+                } catch (NumberFormatException e) {
+                    event.getRowValue().setBpm(event.getNewValue());
+                }
+                enableRunButtonIfReady();
+            }
+        });
+        tracks.getSelectionModel().getSelectedIndices().addListener(new ListChangeListener<Integer>() {
+            public void onChanged(Change<? extends Integer> change) {
+                if (change.getList().size() > 0) {
+                    removeButton.setDisable(false);
+                } else {
+                    removeButton.setDisable(true);
+                }
+            }
+
         });
 
         stage.show();
@@ -152,16 +170,22 @@ public class Controller {
             }
         }
 
+        if (!file.getAbsolutePath().matches("\\A\\p{ASCII}*\\z")) {
+            alert("Error", file.getName() + " contains non ascii characters. Kitchen Sync can currently not process this file, rename the file to add it.");
+            return;
+        }
+
         data.add(trackInfo);
 
         try {
             final AnalyserService analyzer = new AnalyserService(trackInfo);
+            trackInfo.setService(analyzer);
 
             progressIndicator.visibleProperty().bind(analyzer.runningProperty());
             analyzer.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
                 public void handle(WorkerStateEvent workerStateEvent) {
                     float bpm = analyzer.getValue();
-                    trackInfo.setBpm(String.format("%.1f", bpm));
+                    trackInfo.setBpm(String.format("%.1f", (float) Math.round(bpm)));
 
                     enableRunButtonIfReady();
                     updateOutliers();
@@ -176,6 +200,7 @@ public class Controller {
             analyzer.start();
         } catch (Exception e) {
             e.printStackTrace();
+            alert("Error", "Unable to analyse " + file.getName() + ": " + e.getMessage());
         }
     }
 
@@ -224,9 +249,30 @@ public class Controller {
                         processor.start();
                     } catch (Exception e) {
                         e.printStackTrace();
+                        alert("Error", "Unable to process " + info.getFile().getName() + ": " + e.getMessage());
                     }
                 }
             }
         }
+    }
+
+    @FXML
+    protected void removeFiles(ActionEvent event) {
+        tracks.getItems().removeAll(tracks.getSelectionModel().getSelectedItems());
+
+        for (Info track : tracks.getSelectionModel().getSelectedItems()) {
+            if (track.getService().isRunning()) {
+                track.getService().cancel();
+            }
+        }
+    }
+
+    protected void alert(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+
+        alert.showAndWait();
     }
 }

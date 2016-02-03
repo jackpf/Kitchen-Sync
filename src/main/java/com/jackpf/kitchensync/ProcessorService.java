@@ -6,6 +6,7 @@ import javafx.concurrent.Task;
 import sun.awt.Mutex;
 
 import java.io.File;
+import java.io.IOException;
 
 /**
  * Created by jackfarrelly on 26/01/2016.
@@ -13,7 +14,7 @@ import java.io.File;
 public class ProcessorService extends Service<Info> {
     private static final Mutex mutex = new Mutex();
 
-    private final File TMP_FILE = new File("/tmp/tmp.wav");
+    private final File TMP_FILE = new File("/tmp/tmp.wav"), TMP_FILE2 = new File("/tmp/tmp2.wav");
 
     private CInterface cInterface = new CInterface();
 
@@ -39,11 +40,32 @@ public class ProcessorService extends Service<Info> {
             @Override
             protected Info call() throws Exception {
                 mutex.lock();
-                ffmpeg.run(new String[]{"-y", "-i", trackInfo.getFilename(), TMP_FILE.getAbsolutePath()});
-                cInterface.setBpm(TMP_FILE.getAbsolutePath(), Float.parseFloat(trackInfo.getBpm()), targetBpm);
-                ffmpeg.run(new String[]{"-y", "-i", TMP_FILE.getAbsolutePath(), outputDir.getParent() + "/" + trackInfo.getFile().getName()});
+
+                ffmpeg.run(new String[]{"-y", "-i", trackInfo.getFile().getAbsolutePath(), TMP_FILE.getAbsolutePath()});
+
+                if (!TMP_FILE.exists()) {
+                    throw new IOException("File " + TMP_FILE.getAbsolutePath() + " does not exist");
+                }
+
+                cInterface.setBpm(
+                    TMP_FILE.getAbsolutePath(),
+                    TMP_FILE2.getAbsolutePath(),
+                    Float.parseFloat(trackInfo.getBpm()),
+                    targetBpm
+                );
+
                 TMP_FILE.delete();
+
+                if (!TMP_FILE2.exists()) {
+                    throw new IOException("File " + TMP_FILE2.getAbsolutePath() + " does not exist");
+                }
+
+                ffmpeg.run(new String[]{"-y", "-i", TMP_FILE2.getAbsolutePath(), "-ab", "320k", "-ac", "2", outputDir.getParent() + "/" + trackInfo.getFile().getName()});
+
+                TMP_FILE2.delete();
+
                 mutex.unlock();
+
                 return trackInfo;
             }
         };

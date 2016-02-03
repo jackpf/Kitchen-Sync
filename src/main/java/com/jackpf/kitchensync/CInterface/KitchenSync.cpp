@@ -40,8 +40,7 @@ namespace KitchenSync {
 
         if (bpmValue > 0) {
             printf("Detected BPM rate %.1f\n\n", bpmValue);
-        }
-        else {
+        } else {
             printf("Couldn't detect BPM rate.\n\n");
         }
 

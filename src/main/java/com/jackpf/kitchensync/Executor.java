@@ -32,18 +32,26 @@ public class Executor {
         System.out.println("Executing: " + Arrays.toString(cmdArgs));
 
         Process p = Runtime.getRuntime().exec(cmdArgs);
-        p.waitFor();
+        int r = p.waitFor();
 
-        BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
-        String line;
-        while ((line = reader.readLine())!= null) {
-            System.out.println("Output: " + line);
+        BufferedReader stdReader = new BufferedReader(new InputStreamReader(p.getInputStream()));
+        String stdLine;
+        StringBuffer stdSb = new StringBuffer();
+        while ((stdLine = stdReader.readLine())!= null) {
+            System.out.println("Output (std): " + stdLine);
+            stdSb.append(stdLine);
         }
 
-        BufferedReader reader2 = new BufferedReader(new InputStreamReader(p.getErrorStream()));
-        String line2;
-        while ((line2 = reader2.readLine())!= null) {
-            System.out.println("Output: " + line2);
+        BufferedReader errReader = new BufferedReader(new InputStreamReader(p.getErrorStream()));
+        String errLine;
+        StringBuffer errSb = new StringBuffer();
+        while ((errLine = errReader.readLine())!= null) {
+            System.out.println("Output (err): " + errLine);
+            errSb.append(errLine);
+        }
+
+        if (r != 0) {
+            throw new IOException("Process returned non-zero exit code(" + r + "): " + errSb.toString());
         }
     }
 }
