@@ -145,11 +145,11 @@ public class Controller {
 
         for (Info track : data) {
             try {
-                float bpm = Float.parseFloat(track.getBpm());
+                float bpm = Float.parseFloat(track.getBpm().replace(ATN_STR, ""));
 
                 if ((bpm > avg + avg * 0.1 || bpm < avg - avg * 0.1) && !track.getBpm().contains(ATN_STR)) {
                     track.setBpm(track.getBpm() + ATN_STR);
-                } else if (track.getBpm().contains(ATN_STR)) {
+                } else if (track.getBpm().contains(ATN_STR) && (bpm <= avg + avg * 0.1 && bpm >= avg - avg * 0.1)) {
                     track.setBpm(track.getBpm().replace(ATN_STR, ""));
                 }
             } catch (NumberFormatException e) {
@@ -194,6 +194,7 @@ public class Controller {
             analyzer.setOnFailed(new EventHandler<WorkerStateEvent>() {
                 public void handle(WorkerStateEvent workerStateEvent) {
                     workerStateEvent.getSource().getException().printStackTrace();
+                    alert("Error", "Unable to analyse " + trackInfo.getFile().getName() + ": " + workerStateEvent.getSource().getException().getMessage());
                 }
             });
 
@@ -230,7 +231,7 @@ public class Controller {
 
             if (dir != null) {
                 final ObservableList<Info> data = tracks.getItems();
-                for (Info info : data) {
+                for (final Info info : data) {
                     try {
                         final ProcessorService processor = new ProcessorService(info, Integer.parseInt(result.get()), dir);
 
@@ -244,6 +245,7 @@ public class Controller {
                         processor.setOnFailed(new EventHandler<WorkerStateEvent>() {
                             public void handle(WorkerStateEvent workerStateEvent) {
                                 workerStateEvent.getSource().getException().printStackTrace();
+                                alert("Error", "Unable to process " + info.getFile().getName() + ": " + workerStateEvent.getSource().getException().getMessage());
                             }
                         });
                         processor.start();

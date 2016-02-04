@@ -39,6 +39,7 @@ public class ProcessorService extends Service<Info> {
         return new Task<Info>() {
             @Override
             protected Info call() throws Exception {
+                // Needs to be smart mutex!
                 mutex.lock();
 
                 ffmpeg.run(new String[]{"-y", "-i", trackInfo.getFile().getAbsolutePath(), TMP_FILE.getAbsolutePath()});
