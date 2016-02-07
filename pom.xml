@@ -34,6 +34,23 @@
                     </arguments>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>sh.tak.appbundler</groupId>
+                <artifactId>appbundle-maven-plugin</artifactId>
+                <version>1.0.4</version>
+                <configuration>
+                    <mainClass>com.jackpf.kitchensync.Main</mainClass>
+                    <jrePath>/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk</jrePath>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>bundle</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 

@@ -61,7 +61,18 @@ public class ProcessorService extends Service<Info> {
                     throw new IOException("File " + TMP_FILE2.getAbsolutePath() + " does not exist");
                 }
 
-                ffmpeg.run(new String[]{"-y", "-i", TMP_FILE2.getAbsolutePath(), "-ab", "320k", "-ac", "2", outputDir.getParent() + "/" + trackInfo.getFile().getName()});
+                TagWriter.Tags tags = new TagWriter(trackInfo).getTags();
+
+                ffmpeg.run(new String[]{
+                    "-y",
+                    "-i",
+                    TMP_FILE2.getAbsolutePath(),
+                    "-ab", "320k",
+                    "-ac", "2",
+                    "-metadata", "title=" + tags.name + "",
+                    "-metadata", "artist=" + tags.artist + "",
+                    outputDir.getParent() + "/" + trackInfo.getFile().getName()
+                });
 
                 TMP_FILE2.delete();
 
