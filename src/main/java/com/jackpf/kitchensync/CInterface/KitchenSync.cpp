@@ -57,9 +57,9 @@ namespace KitchenSync {
         soundTouch.setSampleRate((int) inFile.getSampleRate());
         soundTouch.setChannels((int) inFile.getNumChannels());
 
-        soundTouch.setTempoChange(tempoDelta);
+        soundTouch.setTempoChange(0.0);
         soundTouch.setPitchSemiTones(0.0);
-        soundTouch.setRateChange(0.0);
+        soundTouch.setRateChange(tempoDelta);
 
         soundTouch.setSetting(SETTING_USE_QUICKSEEK, false);
         soundTouch.setSetting(SETTING_USE_AA_FILTER, true);
@@ -75,9 +75,9 @@ namespace KitchenSync {
     #endif
         // print processing information only if outFileName given i.e. some processing will happen
         printf("Processing the file with the following changes:\n");
-        printf("  tempo change = %+g %%\n", tempoDelta);
+        printf("  tempo change = %+g %%\n", 0.0);
         printf("  pitch change = %+g semitones\n", 0.0);
-        printf("  rate change  = %+g %%\n\n", 0.0);
+        printf("  rate change  = %+g %%\n\n", tempoDelta);
         printf("Working...\n");
 
         // Process
