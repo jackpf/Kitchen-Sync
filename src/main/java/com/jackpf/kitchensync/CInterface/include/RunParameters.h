@@ -39,7 +39,7 @@
 #ifndef RUNPARAMETERS_H
 #define RUNPARAMETERS_H
 
-#include "STTypes.h"
+#include <soundtouch/STTypes.h>
 #include <string>
 
 using namespace std;
