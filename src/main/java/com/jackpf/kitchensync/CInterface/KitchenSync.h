@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <sstream>
 
 #include <soundtouch/SoundTouch.h>
 #include <soundtouch/BPMDetect.h>
@@ -13,6 +14,19 @@ namespace KitchenSync
     #define BUFF_SIZE           6720
 
     static SoundTouch soundTouch;
+
+    typedef struct {
+        char  *inFileName;
+        char  *outFileName;
+        float tempoDelta;
+        float pitchDelta;
+        float rateDelta;
+        int   quick;
+        int   noAntiAlias;
+        float goalBPM;
+        bool  detectBPM;
+        bool  speech;
+    } RunParameters;
 
     const char *getVersion();
     float getBpm(const char *filename);

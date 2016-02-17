@@ -7,6 +7,8 @@ import sun.awt.Mutex;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
+import java.net.URLDecoder;
 
 /**
  * Created by jackfarrelly on 26/01/2016.
@@ -23,7 +25,9 @@ public class AnalyserService extends Service<Float> {
     private final Info trackInfo;
 
     public AnalyserService(Info trackInfo) throws Exception {
-        ffmpeg = new Executor("ffmpeg");
+        ffmpeg = new Executor(
+            URLDecoder.decode(ClassLoader.getSystemClassLoader().getResource("ffmpeg").getPath(), "UTF-8")
+        );
         this.trackInfo = trackInfo;
     }
 
