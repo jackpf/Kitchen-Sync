@@ -17,6 +17,8 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 import java.io.File;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -50,6 +52,22 @@ public class Controller {
 
     @FXML
     private Button removeButton;
+
+    private Executor spek;
+
+    public Controller() {
+        try {
+            spek = new Executor(
+                "open",
+                new String[]{
+                    URLDecoder.decode(ClassLoader.getSystemClassLoader().getResource("Spek.app").getPath(), "UTF-8"),
+                    "--args"
+                }
+            );
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+    }
 
     public void initialise(Parent root, Stage stage) {
         this.stage = stage;
@@ -95,6 +113,20 @@ public class Controller {
                 }
                 enableRunButtonIfReady();
             }
+        });
+        tracks.setRowFactory(tv -> {
+            TableRow<Info> row = new TableRow<>();
+            row.setOnMouseClicked(event -> {
+                if (event.getClickCount() == 2 && (!row.isEmpty()) ) {
+                    Info info = row.getItem();
+                    try {
+                        spek.run(new String[]{info.getFile().getPath()});
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+            return row;
         });
         tracks.getSelectionModel().getSelectedIndices().addListener(new ListChangeListener<Integer>() {
             public void onChanged(Change<? extends Integer> change) {

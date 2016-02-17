@@ -1,5 +1,7 @@
 package com.jackpf.kitchensync;
 
+import org.apache.commons.lang3.ArrayUtils;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -10,9 +12,29 @@ import java.util.Arrays;
  */
 public class Executor {
     private String file;
+    private String[] permanentArgs;
 
-    public Executor(String file) throws Exception {
-        this.file = file.replaceAll(" ", "\\ ");
+    private String escape(String s) {
+        return s.replaceAll(" ", "\\ ");
+    }
+
+    private String[] escape(String[] sArray) {
+        String[] r = new String[sArray.length];
+
+        for (int i = 0; i < sArray.length; i++) {
+            r[i] = escape(sArray[i]);
+        }
+
+        return r;
+    }
+
+    public Executor(String file) {
+        this(file, new String[]{});
+    }
+
+    public Executor(String file, String[] permanentArgs) /*throws Exception*/ {
+        this.file = escape(file);
+        this.permanentArgs = escape(permanentArgs);
 
         /*Process p = Runtime.getRuntime().exec("which " + file);
         p.waitFor();
@@ -23,10 +45,11 @@ public class Executor {
     }
 
     public void run(String[] args) throws IOException, InterruptedException {
-        String[] cmdArgs = new String[args.length + 1];
+        String[] allArgs = ArrayUtils.addAll(permanentArgs, args);
+        String[] cmdArgs = new String[allArgs.length + 1];
         cmdArgs[0] = file;
-        for (int i = 0; i < args.length; i++) {
-            cmdArgs[i + 1] = args[i];
+        for (int i = 0; i < allArgs.length; i++) {
+            cmdArgs[i + 1] = escape(allArgs[i]);
         }
 
         System.out.println("Executing: " + Arrays.toString(cmdArgs));
