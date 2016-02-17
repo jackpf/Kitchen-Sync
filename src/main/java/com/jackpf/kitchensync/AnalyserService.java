@@ -5,17 +5,13 @@ import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import sun.awt.Mutex;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 import java.net.URLDecoder;
 
 /**
  * Created by jackfarrelly on 26/01/2016.
  */
 public class AnalyserService extends Service<Float> {
-    private final File TMP_FILE = new File("/tmp/tmp.wav");
-
     private static final Mutex mutex = new Mutex();
 
     private CInterface cInterface = new CInterface();
@@ -39,15 +35,15 @@ public class AnalyserService extends Service<Float> {
                 // Needs to be smart mutex!
                 mutex.lock();
 
-                ffmpeg.run(new String[]{"-y", "-i", trackInfo.getFile().getAbsolutePath(), TMP_FILE.getAbsolutePath()});
+                ffmpeg.run(new String[]{"-y", "-i", trackInfo.getFile().getAbsolutePath(), trackInfo.getTmpFile().getAbsolutePath()});
 
-                if (!TMP_FILE.exists()) {
-                    throw new IOException("File " + TMP_FILE.getAbsolutePath() + " does not exist");
+                if (!trackInfo.getTmpFile().exists()) {
+                    throw new IOException("File " + trackInfo.getTmpFile().getAbsolutePath() + " does not exist");
                 }
 
-                float bpm = cInterface.getBpm(TMP_FILE.getAbsolutePath());
+                float bpm = cInterface.getBpm(trackInfo.getTmpFile().getAbsolutePath());
 
-                TMP_FILE.delete();
+                trackInfo.getTmpFile().delete();
 
                 mutex.unlock();
 

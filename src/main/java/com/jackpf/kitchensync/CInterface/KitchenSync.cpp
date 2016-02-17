@@ -120,7 +120,7 @@ namespace KitchenSync {
 
         if ((inFile == NULL) || (outFile == NULL)) return;  // nothing to do.
 
-        nChannels = (int)inFile->getNumChannels();
+        nChannels = (int) inFile->getNumChannels();
         assert(nChannels > 0);
         buffSizeSamples = BUFF_SIZE / nChannels;
 
@@ -130,7 +130,7 @@ namespace KitchenSync {
 
             // Read a chunk of samples from the input file
             num = inFile->read(sampleBuffer, BUFF_SIZE);
-            nSamples = num / (int)inFile->getNumChannels();
+            nSamples = num / (int) inFile->getNumChannels();
 
             // Feed the samples into SoundTouch processor
             pSoundTouch->putSamples(sampleBuffer, nSamples);

@@ -14,8 +14,6 @@ import java.io.IOException;
 public class ProcessorService extends Service<Info> {
     private static final Mutex mutex = new Mutex();
 
-    private final File TMP_FILE = new File("/tmp/tmp.wav"), TMP_FILE2 = new File("/tmp/tmp2.wav");
-
     private CInterface cInterface = new CInterface();
 
     private Executor ffmpeg;
@@ -42,23 +40,23 @@ public class ProcessorService extends Service<Info> {
                 // Needs to be smart mutex!
                 mutex.lock();
 
-                ffmpeg.run(new String[]{"-y", "-i", trackInfo.getFile().getAbsolutePath(), TMP_FILE.getAbsolutePath()});
+                ffmpeg.run(new String[]{"-y", "-i", trackInfo.getFile().getAbsolutePath(), trackInfo.getTmpFile().getAbsolutePath()});
 
-                if (!TMP_FILE.exists()) {
-                    throw new IOException("File " + TMP_FILE.getAbsolutePath() + " does not exist");
+                if (!trackInfo.getTmpFile().exists()) {
+                    throw new IOException("File " + trackInfo.getTmpFile().getAbsolutePath() + " does not exist");
                 }
 
                 cInterface.setBpm(
-                    TMP_FILE.getAbsolutePath(),
-                    TMP_FILE2.getAbsolutePath(),
+                    trackInfo.getTmpFile().getAbsolutePath(),
+                    trackInfo.getTmpFile2().getAbsolutePath(),
                     Float.parseFloat(trackInfo.getBpm()),
                     targetBpm
                 );
 
-                TMP_FILE.delete();
+                trackInfo.getTmpFile().delete();
 
-                if (!TMP_FILE2.exists()) {
-                    throw new IOException("File " + TMP_FILE2.getAbsolutePath() + " does not exist");
+                if (!trackInfo.getTmpFile2().exists()) {
+                    throw new IOException("File " + trackInfo.getTmpFile2().getAbsolutePath() + " does not exist");
                 }
 
                 TagWriter.Tags tags = new TagWriter(trackInfo).getTags();
@@ -66,7 +64,7 @@ public class ProcessorService extends Service<Info> {
                 ffmpeg.run(new String[]{
                     "-y",
                     "-i",
-                    TMP_FILE2.getAbsolutePath(),
+                    trackInfo.getTmpFile2().getAbsolutePath(),
                     "-ab", "320k",
                     "-ac", "2",
                     "-metadata", "title=" + tags.name + "",
@@ -74,7 +72,7 @@ public class ProcessorService extends Service<Info> {
                     outputDir.getParent() + "/" + trackInfo.getFile().getName()
                 });
 
-                TMP_FILE2.delete();
+                trackInfo.getTmpFile2().delete();
 
                 mutex.unlock();
 

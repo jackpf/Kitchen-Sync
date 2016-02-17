@@ -2,8 +2,12 @@ package com.jackpf.kitchensync;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.concurrent.Service;
+import org.apache.commons.codec.digest.DigestUtils;
 
 import java.io.File;
+import java.io.IOException;
+import java.sql.Timestamp;
+import java.util.Date;
 
 /**
  * Created by jackfarrelly on 25/01/2016.
@@ -17,10 +21,16 @@ public class Info {
 
     private final File file;
 
+    private final File tmpFile, tmpFile2;
+
     private Service service;
 
-    public Info(File file, String bpm) {
+    public Info(File file, String bpm) throws IOException {
         this.file = file;
+        String hash = DigestUtils.sha1Hex(file.getPath() + new Timestamp(new Date().getTime()) + Math.random());
+        this.tmpFile = File.createTempFile(hash, ".wav");
+        this.tmpFile2 = File.createTempFile(hash + "-2", ".wav");
+
         setFilename(file.getAbsolutePath());
         setDisplayName(file.getName());
         setBpm(bpm);
@@ -64,6 +74,14 @@ public class Info {
 
     public File getFile() {
         return file;
+    }
+
+    public File getTmpFile() {
+        return tmpFile;
+    }
+
+    public File getTmpFile2() {
+        return tmpFile2;
     }
 
     public Service getService() {

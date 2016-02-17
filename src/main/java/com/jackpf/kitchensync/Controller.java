@@ -93,8 +93,13 @@ public class Controller {
                 if (db.hasFiles()) {
                     for (File file : db.getFiles()) {
                         if (file.getName().toLowerCase().endsWith(".mp3") || file.getName().toLowerCase().endsWith(".wav")) {
-                            addTrack(file);
-                            success = true;
+                            try {
+                                addTrack(file);
+                                success = true;
+                            }  catch (Exception e) {
+                                e.printStackTrace();
+                                alert("Error", "Unable to process " + file.getName() + ": " + e.getMessage());
+                            }
                         }
                     }
                 }
@@ -123,6 +128,7 @@ public class Controller {
                         spek.run(new String[]{info.getFile().getPath()});
                     } catch (Exception e) {
                         e.printStackTrace();
+                        alert("Error", "Unable to open Spek: " + e.getMessage());
                     }
                 }
             });
@@ -190,7 +196,7 @@ public class Controller {
         }
     }
 
-    protected void addTrack(File file) {
+    protected void addTrack(File file) throws Exception {
         final ObservableList<Info> data = tracks.getItems();
 
         final Info trackInfo = new Info(file, Info.NO_BPM);
@@ -203,38 +209,32 @@ public class Controller {
         }
 
         if (!file.getAbsolutePath().matches("\\A\\p{ASCII}*\\z")) {
-            alert("Error", file.getName() + " contains non ascii characters. Kitchen Sync can currently not process this file, rename the file to add it.");
-            return;
+            throw new RuntimeException(file.getName() + " contains non ascii characters. Kitchen Sync can currently not process this file, rename the file to add it.");
         }
 
         data.add(trackInfo);
 
-        try {
-            final AnalyserService analyzer = new AnalyserService(trackInfo);
-            trackInfo.setService(analyzer);
+        final AnalyserService analyzer = new AnalyserService(trackInfo);
+        trackInfo.setService(analyzer);
 
-            progressIndicator.visibleProperty().bind(analyzer.runningProperty());
-            analyzer.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
-                public void handle(WorkerStateEvent workerStateEvent) {
-                    float bpm = analyzer.getValue();
-                    trackInfo.setBpm(String.format("%.1f", (float) Math.round(bpm)));
+        progressIndicator.visibleProperty().bind(analyzer.runningProperty());
+        analyzer.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
+            public void handle(WorkerStateEvent workerStateEvent) {
+                float bpm = analyzer.getValue();
+                trackInfo.setBpm(String.format("%.1f", (float) Math.round(bpm)));
 
-                    enableRunButtonIfReady();
-                    updateOutliers();
-                }
-            });
-            analyzer.setOnFailed(new EventHandler<WorkerStateEvent>() {
-                public void handle(WorkerStateEvent workerStateEvent) {
-                    workerStateEvent.getSource().getException().printStackTrace();
-                    alert("Error", "Unable to analyse " + trackInfo.getFile().getName() + ": " + workerStateEvent.getSource().getException().getMessage());
-                }
-            });
+                enableRunButtonIfReady();
+                updateOutliers();
+            }
+        });
+        analyzer.setOnFailed(new EventHandler<WorkerStateEvent>() {
+            public void handle(WorkerStateEvent workerStateEvent) {
+                workerStateEvent.getSource().getException().printStackTrace();
+                alert("Error", "Unable to analyse " + trackInfo.getFile().getName() + ": " + workerStateEvent.getSource().getException().getMessage());
+            }
+        });
 
-            analyzer.start();
-        } catch (Exception e) {
-            e.printStackTrace();
-            alert("Error", "Unable to analyse " + file.getName() + ": " + e.getMessage());
-        }
+        analyzer.start();
     }
 
     @FXML
@@ -245,7 +245,12 @@ public class Controller {
         List<File> files = fileChooser.showOpenMultipleDialog(stage);
 
         for (File file : files) {
-            addTrack(file);
+            try {
+                addTrack(file);
+            } catch (Exception e) {
+                e.printStackTrace();
+                alert("Error", "Unable to process " + file.getName() + ": " + e.getMessage());
+            }
         }
     }
 
