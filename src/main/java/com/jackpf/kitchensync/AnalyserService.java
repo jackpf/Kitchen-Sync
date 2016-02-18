@@ -14,13 +14,14 @@ import java.net.URLDecoder;
 public class AnalyserService extends Service<Float> {
     private static final Mutex mutex = new Mutex();
 
-    private CInterface cInterface = new CInterface();
+    private CInterface cInterface;
 
     private Executor ffmpeg;
 
     private final Info trackInfo;
 
     public AnalyserService(Info trackInfo) throws Exception {
+        this.cInterface = new CInterface();
         ffmpeg = new Executor(
             URLDecoder.decode(ClassLoader.getSystemClassLoader().getResource("ffmpeg").getPath(), "UTF-8")
         );

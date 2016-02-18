@@ -165,25 +165,17 @@ namespace KitchenSync {
         RunParameters *params;
         SoundTouch soundTouch;
 
-        float tempoDelta = (toBpm / fromBpm - 1.0f) * 100.0f;
-        std::ostringstream stringStream;
-        stringStream << "-rate=" << (tempoDelta >= 0 ? "+" : "") << std::to_string(tempoDelta);
-
-        const char *paramStr[] = {"", inFilename, outFilename, stringStream.str().c_str()};
-
         try
         {
             // Parse command line parameters
-            params = new RunParameters(4, paramStr);
+            params = new RunParameters();
+
+            params->inFileName = inFilename;
+            params->outFileName = outFilename;
+            params->rateDelta = (toBpm / fromBpm - 1.0f) * 100.0f;
 
             // Open input & output files
             openFiles(&inFile, &outFile, params);
-
-            if (params->detectBPM == true) {
-                // detect sound BPM (and adjust processing parameters
-                //  accordingly if necessary)
-                detectBPM(inFile, params);
-            }
 
             // Setup the 'SoundTouch' object for processing the sound
             setup(&soundTouch, inFile, params);

@@ -16,16 +16,16 @@ namespace KitchenSync
     static SoundTouch soundTouch;
 
     typedef struct {
-        char  *inFileName;
-        char  *outFileName;
-        float tempoDelta;
-        float pitchDelta;
-        float rateDelta;
-        int   quick;
-        int   noAntiAlias;
-        float goalBPM;
-        bool  detectBPM;
-        bool  speech;
+        const char  *inFileName;
+        const char  *outFileName;
+        float       tempoDelta;
+        float       pitchDelta;
+        float       rateDelta;
+        int         quick;
+        int         noAntiAlias;
+        float       goalBPM;
+        //bool        detectBPM;
+        bool        speech;
     } RunParameters;
 
     const char *getVersion();

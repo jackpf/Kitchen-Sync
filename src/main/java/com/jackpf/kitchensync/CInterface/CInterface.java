@@ -8,8 +8,12 @@ public class CInterface {
     public native float getBpm(String filename);
     public native void setBpm(String inFilename, String outFilename, float fromBpm, float toBpm);
 
-    static {
-        System.loadLibrary("kitchensync");
+    public CInterface() {//static {
+        try {
+            System.loadLibrary("kitchensync");
+        } catch (UnsatisfiedLinkError e) {
+            throw new RuntimeException("Unable to load kitchensync library", e);
+        }
     }
 
     public static void main(String[] args) {

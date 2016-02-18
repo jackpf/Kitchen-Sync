@@ -38,6 +38,7 @@
                     <executable>java</executable>
                     <arguments>
                         <argument>-Djava.library.path=${project.basedir}/src/main/java/com/jackpf/kitchensync/CInterface</argument>
+                        <!--<argument>-Djava.library.path=/usr/local/lib</argument>-->
                         <argument>-classpath</argument>
                         <classpath />
                         <argument>com.jackpf.kitchensync.Main</argument>
@@ -50,7 +51,10 @@
                 <version>1.0.4</version>
                 <configuration>
                     <mainClass>com.jackpf.kitchensync.Main</mainClass>
-                    <jrePath>/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk</jrePath>
+                    <!--<jrePath>/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk</jrePath>-->
+                    <jvmOptions>
+                        <jvmOption>-Djava.library.path=/usr/local/lib</jvmOption>
+                    </jvmOptions>
                 </configuration>
                 <executions>
                     <execution>
