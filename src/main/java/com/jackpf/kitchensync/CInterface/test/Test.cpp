@@ -1,6 +1,8 @@
 #include <jni.h>
 #include <iostream>
+
 #include "KitchenSync.h"
+#include "KitchenSyncAnalyser.h"
 
 int main(int argc, char *argv[]) {
     if (argc < 4) {
@@ -14,6 +16,10 @@ int main(int argc, char *argv[]) {
     float bpm = KitchenSync::getBpm(argv[1]);
 
     printf("BPM of %s: %f'n\n", argv[1], bpm);
+
+    float quality = KitchenSync::getQuality(argv[1]);
+
+    printf("Quality of %s: %f\n", argv[1], quality);
 
     KitchenSync::setBpm(argv[1], argv[2], bpm, std::stof(argv[3]));
 

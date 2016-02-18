@@ -33,3 +33,15 @@ JNIEXPORT void JNICALL Java_com_jackpf_kitchensync_CInterface_CInterface_setBpm
     env->ReleaseStringUTFChars(jInFilename, inFilename);
     env->ReleaseStringUTFChars(jOutFilename, outFilename);
 }
+
+JNIEXPORT jfloat JNICALL Java_com_jackpf_kitchensync_CInterface_CInterface_getQuality
+  (JNIEnv *env, jobject obj, jstring jFilename)
+{
+    const char *filename = env->GetStringUTFChars(jFilename, 0);
+
+    float quality = KitchenSync::getQuality(filename);
+
+    env->ReleaseStringUTFChars(jFilename, filename);
+
+    return (jfloat) quality;
+}

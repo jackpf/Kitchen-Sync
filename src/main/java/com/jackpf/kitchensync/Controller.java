@@ -210,7 +210,7 @@ public class Controller {
         }
 
         if (!file.getAbsolutePath().matches("\\A\\p{ASCII}*\\z")) {
-            throw new RuntimeException(file.getName() + " contains non ascii characters. Kitchen Sync can currently not process this file, rename the file to add it.");
+            throw new RuntimeException(file.getName() + " contains non ascii characters. This version of Kitchen Sync can not process this file, rename the file to add it.");
         }
 
         data.add(trackInfo);

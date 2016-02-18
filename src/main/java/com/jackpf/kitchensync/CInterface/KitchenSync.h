@@ -5,6 +5,7 @@
 #include <soundtouch/BPMDetect.h>
 
 #include "WavFile.h"
+#include "KitchenSyncAnalyser.h"
 
 namespace KitchenSync
 {
@@ -29,6 +30,10 @@ namespace KitchenSync
     } RunParameters;
 
     const char *getVersion();
+
     float getBpm(const char *filename);
+
     void setBpm(const char *inFilename, const char *outFilename, float fromBpm, float toBpm);
+
+    float getQuality(const char *filename);
 }

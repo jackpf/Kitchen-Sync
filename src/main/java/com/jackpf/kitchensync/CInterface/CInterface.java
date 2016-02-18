@@ -7,6 +7,7 @@ public class CInterface {
     public native String getVersion();
     public native float getBpm(String filename);
     public native void setBpm(String inFilename, String outFilename, float fromBpm, float toBpm);
+    public native float getQuality(String filename);
 
     public CInterface() {//static {
         try {

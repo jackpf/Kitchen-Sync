@@ -199,4 +199,8 @@ namespace KitchenSync {
             fprintf(stderr, "%s\n", e.what());
         }
     }
+
+    float getQuality(const char *filename) {
+        return analyse(filename);
+    }
 }

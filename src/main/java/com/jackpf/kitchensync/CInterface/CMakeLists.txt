@@ -18,8 +18,8 @@ link_directories(
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}")
 
-add_executable(libkitchensync.dylib CInterface.cpp KitchenSync.cpp include/WavFile.cpp include/RunParameters.cpp)
-target_link_libraries(libkitchensync.dylib SoundTouch)
+add_executable(libkitchensync.dylib CInterface.cpp KitchenSync.cpp KitchenSyncAnalyser.cpp include/WavFile.cpp include/RunParameters.cpp)
+target_link_libraries(libkitchensync.dylib soundtouch fftw3 m)
 
 # Install targets
 install(TARGETS libkitchensync.dylib DESTINATION /usr/local/lib/)
