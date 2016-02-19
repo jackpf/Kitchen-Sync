@@ -1,6 +1,5 @@
 package com.jackpf.kitchensync;
 
-import javafx.application.Platform;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.concurrent.WorkerStateEvent;
@@ -49,7 +48,10 @@ public class Controller {
     private Button addButton;
 
     @FXML
-    private Button runButton;
+    private Button saveButton;
+
+    @FXML
+    private Button burnButton;
 
     @FXML
     private Button removeButton;
@@ -77,36 +79,31 @@ public class Controller {
         stage.setScene(new Scene(root, 300, 275));
         stage.setResizable(false);
 
-        stage.getScene().setOnDragOver(new EventHandler<DragEvent>() {
-            public void handle(DragEvent event) {
-                Dragboard db = event.getDragboard();
-                if (db.hasFiles()) {
-                    event.acceptTransferModes(TransferMode.COPY);
-                } else {
-                    event.consume();
-                }
+        stage.getScene().setOnDragOver((DragEvent event) -> {
+            Dragboard db = event.getDragboard();
+            if (db.hasFiles()) {
+                event.acceptTransferModes(TransferMode.COPY);
+            } else {
+                event.consume();
             }
         });
-        stage.getScene().setOnDragDropped(new EventHandler<DragEvent>() {
-            public void handle(DragEvent event) {
-                Dragboard db = event.getDragboard();
-                boolean success = false;
-                if (db.hasFiles()) {
-                    for (File file : db.getFiles()) {
-                        if (file.getName().toLowerCase().endsWith(".mp3") || file.getName().toLowerCase().endsWith(".wav")) {
-                            try {
-                                addTrack(file);
-                                success = true;
-                            }  catch (Exception e) {
-                                e.printStackTrace();
-                                alert("Error", "Unable to process " + file.getName() + ": " + e.getMessage());
-                            }
+        stage.getScene().setOnDragDropped((DragEvent event) -> {
+            Dragboard db = event.getDragboard();
+            boolean success = false;
+            if (db.hasFiles()) {
+                for (File file : db.getFiles()) {
+                    if (file.getName().toLowerCase().endsWith(".mp3") || file.getName().toLowerCase().endsWith(".wav")) {
+                        try {
+                            addTrack(file);
+                            success = true;
+                        }  catch (Exception e) {
+                            Helpers.handleError(e);
                         }
                     }
                 }
-                event.setDropCompleted(success);
-                event.consume();
             }
+            event.setDropCompleted(success);
+            event.consume();
         });
 
         bpm.setCellFactory(TextFieldTableCell.<Info>forTableColumn());
@@ -117,7 +114,7 @@ public class Controller {
                 } catch (NumberFormatException e) {
                     event.getRowValue().setBpm(event.getNewValue());
                 }
-                enableRunButtonIfReady();
+                enableButtonsIfReady();
             }
         });
         tracks.setRowFactory(tv -> {
@@ -128,28 +125,24 @@ public class Controller {
                     try {
                         spek.run(new String[]{info.getFile().getPath()});
                     } catch (Exception e) {
-                        e.printStackTrace();
-                        alert("Error", "Unable to open Spek: " + e.getMessage());
+                        Helpers.handleError(e);
                     }
                 }
             });
             return row;
         });
-        tracks.getSelectionModel().getSelectedIndices().addListener(new ListChangeListener<Integer>() {
-            public void onChanged(Change<? extends Integer> change) {
-                if (change.getList().size() > 0) {
-                    removeButton.setDisable(false);
-                } else {
-                    removeButton.setDisable(true);
-                }
+        tracks.getSelectionModel().getSelectedIndices().addListener((ListChangeListener.Change<? extends Integer> change) -> {
+            if (change.getList().size() > 0) {
+                removeButton.setDisable(false);
+            } else {
+                removeButton.setDisable(true);
             }
-
         });
 
         stage.show();
     }
 
-    protected void enableRunButtonIfReady() {
+    protected void enableButtonsIfReady() {
         ObservableList<Info> data = tracks.getItems();
         boolean isRunnable = true;
 
@@ -161,7 +154,8 @@ public class Controller {
             isRunnable = false;
         }
 
-        runButton.setDisable(!isRunnable);
+        saveButton.setDisable(!isRunnable);
+        burnButton.setDisable(!isRunnable);
     }
 
     protected void updateOutliers() {
@@ -202,9 +196,8 @@ public class Controller {
 
         final Info trackInfo = new Info(file, Info.NO_BPM);
 
-        // Needs to check filename instead
         for (Info track : data) {
-            if (track.getFilename().equals(trackInfo.getFilename())) {
+            if (track.getFile().getAbsolutePath().equals(trackInfo.getFile().getAbsolutePath())) {
                 return;
             }
         }
@@ -218,30 +211,26 @@ public class Controller {
         final AnalyserService analyzer = new AnalyserService(trackInfo);
         trackInfo.setService(analyzer);
 
-        progressIndicator.visibleProperty().bind(analyzer.runningProperty());
-        analyzer.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
-            public void handle(WorkerStateEvent workerStateEvent) {
-                float bpm = analyzer.getValue();
-                trackInfo.setBpm(String.format("%.1f", (float) Math.round(bpm)));
+        analyzer.setOnSucceeded((WorkerStateEvent workerStateEvent) -> {
+            float bpm = analyzer.getValue();
+            trackInfo.setBpm(String.format("%.1f", (float) Math.round(bpm)));
 
-                enableRunButtonIfReady();
-                updateOutliers();
-            }
+            enableButtonsIfReady();
+            updateOutliers();
         });
-        analyzer.setOnFailed(new EventHandler<WorkerStateEvent>() {
-            public void handle(WorkerStateEvent workerStateEvent) {
-                workerStateEvent.getSource().getException().printStackTrace();
-                alert("Error", "Unable to analyse " + trackInfo.getFile().getName() + ": " + workerStateEvent.getSource().getException().getMessage());
-            }
+        analyzer.setOnFailed((WorkerStateEvent workerStateEvent) -> {
+            Helpers.handleError(workerStateEvent.getSource().getException());
         });
 
         analyzer.start();
+
+        progressIndicator.visibleProperty().bind(analyzer.runningProperty());
     }
 
     @FXML
     protected void addFiles(ActionEvent event) {
         FileChooser fileChooser = new FileChooser();
-        FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("Audio files", new ArrayList<String>(Arrays.asList("*.mp3", "*.wav")));
+        FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("Audio files", new ArrayList<>(Arrays.asList("*.mp3", "*.wav")));
         fileChooser.getExtensionFilters().add(extFilter);
         List<File> files = fileChooser.showOpenMultipleDialog(stage);
 
@@ -249,14 +238,13 @@ public class Controller {
             try {
                 addTrack(file);
             } catch (Exception e) {
-                e.printStackTrace();
-                alert("Error", "Unable to process " + file.getName() + ": " + e.getMessage());
+                Helpers.handleError(e);
             }
         }
     }
 
     @FXML
-    protected void run(ActionEvent event) {
+    protected void save(ActionEvent event) {
         TextInputDialog dialog = new TextInputDialog();
         dialog.setTitle("Target BPM");
         dialog.setHeaderText("Set target BPM");
@@ -273,27 +261,28 @@ public class Controller {
                     try {
                         final ProcessorService processor = new ProcessorService(info, Integer.parseInt(result.get()), dir);
 
-                        progressIndicator.visibleProperty().bind(processor.runningProperty());
-                        processor.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
-                            public void handle(WorkerStateEvent workerStateEvent) {
-                                Info track = processor.getValue();
-                                data.remove(track);
-                            }
+                        processor.setOnSucceeded((WorkerStateEvent workerStateEvent) -> {
+                            Info track = processor.getValue();
+                            data.remove(track);
                         });
-                        processor.setOnFailed(new EventHandler<WorkerStateEvent>() {
-                            public void handle(WorkerStateEvent workerStateEvent) {
-                                workerStateEvent.getSource().getException().printStackTrace();
-                                alert("Error", "Unable to process " + info.getFile().getName() + ": " + workerStateEvent.getSource().getException().getMessage());
-                            }
+                        processor.setOnFailed((WorkerStateEvent workerStateEvent) -> {
+                            Helpers.handleError(workerStateEvent.getSource().getException());
                         });
+
                         processor.start();
+
+                        progressIndicator.visibleProperty().bind(processor.runningProperty());
                     } catch (Exception e) {
-                        e.printStackTrace();
-                        alert("Error", "Unable to process " + info.getFile().getName() + ": " + e.getMessage());
+                        Helpers.handleError(e);
                     }
                 }
             }
         }
+    }
+
+    @FXML
+    protected void burn(ActionEvent event) {
+        Helpers.alert("Oops", "Not yet implemented");
     }
 
     @FXML
@@ -305,16 +294,5 @@ public class Controller {
                 track.getService().cancel();
             }
         }
-    }
-
-    protected void alert(String title, String message) {
-        Platform.runLater(() -> {
-            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setTitle(title);
-            alert.setHeaderText(null);
-            alert.setContentText(message);
-
-            alert.showAndWait();
-        });
     }
 }

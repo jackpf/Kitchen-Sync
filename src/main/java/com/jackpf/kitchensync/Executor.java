@@ -1,11 +1,17 @@
 package com.jackpf.kitchensync;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Created by jackfarrelly on 24/01/2016.
@@ -44,37 +50,47 @@ public class Executor {
         }*/
     }
 
-    public void run(String[] args) throws IOException, InterruptedException {
+    protected String[] buildCmd(String[] args) {
         String[] allArgs = ArrayUtils.addAll(permanentArgs, args);
         String[] cmdArgs = new String[allArgs.length + 1];
+
         cmdArgs[0] = file;
         for (int i = 0; i < allArgs.length; i++) {
             cmdArgs[i + 1] = escape(allArgs[i]);
         }
+
+        return cmdArgs;
+    }
+
+    protected List<String> getStreamOutput(InputStream stream) throws IOException {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
+        String line;
+        List<String> lines = new ArrayList<>();
+
+        while ((line = reader.readLine())!= null) {
+            System.out.println("Output (" + stream.getClass().getName() + "): " + line);
+
+            lines.add(line);
+        }
+
+        return lines;
+    }
+
+    public Pair<List<String>, List<String>> run(String[] args) throws IOException, InterruptedException {
+        String[] cmdArgs = buildCmd(args);
 
         System.out.println("Executing: " + Arrays.toString(cmdArgs));
 
         Process p = Runtime.getRuntime().exec(cmdArgs);
         int r = p.waitFor();
 
-        BufferedReader stdReader = new BufferedReader(new InputStreamReader(p.getInputStream()));
-        String stdLine;
-        StringBuffer stdSb = new StringBuffer();
-        while ((stdLine = stdReader.readLine())!= null) {
-            System.out.println("Output (std): " + stdLine);
-            stdSb.append(stdLine);
-        }
-
-        BufferedReader errReader = new BufferedReader(new InputStreamReader(p.getErrorStream()));
-        String errLine;
-        StringBuffer errSb = new StringBuffer();
-        while ((errLine = errReader.readLine())!= null) {
-            System.out.println("Output (err): " + errLine);
-            errSb.append(errLine);
-        }
+        List<String> stdLines = getStreamOutput(p.getInputStream()),
+            errLines = getStreamOutput(p.getErrorStream());
 
         if (r != 0) {
-            throw new IOException("Process returned non-zero exit code(" + r + "): " + errSb.toString());
+            throw new IOException("Process returned non-zero exit code(" + r + "): " + StringUtils.join(errLines.toArray(), "\n"));
         }
+
+        return new ImmutablePair<>(stdLines, errLines);
     }
 }
