@@ -19,8 +19,6 @@ import javafx.stage.Stage;
 import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,13 +31,13 @@ public class Controller {
     private Parent root;
 
     @FXML
-    private TableView<Info> tracks;
+    private TableView<Info> tracksTable;
 
     @FXML
-    private TableColumn filename;
+    private TableColumn filenameColumn;
 
     @FXML
-    private TableColumn bpm;
+    private TableColumn bpmColumn;
 
     @FXML
     private ProgressIndicator progressIndicator;
@@ -55,6 +53,8 @@ public class Controller {
 
     @FXML
     private Button removeButton;
+
+    private Tracks tracks;
 
     private Executor spek;
 
@@ -73,6 +73,7 @@ public class Controller {
     }
 
     public void initialise(Parent root, Stage stage) {
+        this.tracks = new Tracks(tracksTable.getItems());
         this.stage = stage;
 
         stage.setTitle("Kitchen Sync");
@@ -92,13 +93,12 @@ public class Controller {
             boolean success = false;
             if (db.hasFiles()) {
                 for (File file : db.getFiles()) {
-                    if (file.getName().toLowerCase().endsWith(".mp3") || file.getName().toLowerCase().endsWith(".wav")) {
-                        try {
-                            addTrack(file);
+                    try {
+                        if (addTrack(file) != null) {
                             success = true;
-                        }  catch (Exception e) {
-                            Helpers.handleError(e);
                         }
+                    }  catch (Exception e) {
+                        Helpers.handleError(e);
                     }
                 }
             }
@@ -106,8 +106,8 @@ public class Controller {
             event.consume();
         });
 
-        bpm.setCellFactory(TextFieldTableCell.<Info>forTableColumn());
-        bpm.setOnEditCommit(new EventHandler<TableColumn.CellEditEvent<Info, String>>() {
+        bpmColumn.setCellFactory(TextFieldTableCell.<Info>forTableColumn());
+        bpmColumn.setOnEditCommit(new EventHandler<TableColumn.CellEditEvent<Info, String>>() {
             public void handle(TableColumn.CellEditEvent<Info, String> event) {
                 try {
                     event.getRowValue().setBpm(String.format("%.1f", Float.parseFloat(event.getNewValue())));
@@ -117,7 +117,7 @@ public class Controller {
                 enableButtonsIfReady();
             }
         });
-        tracks.setRowFactory(tv -> {
+        tracksTable.setRowFactory(tv -> {
             TableRow<Info> row = new TableRow<>();
             row.setOnMouseClicked(event -> {
                 if (event.getClickCount() == 2 && (!row.isEmpty()) ) {
@@ -131,7 +131,7 @@ public class Controller {
             });
             return row;
         });
-        tracks.getSelectionModel().getSelectedIndices().addListener((ListChangeListener.Change<? extends Integer> change) -> {
+        tracksTable.getSelectionModel().getSelectedIndices().addListener((ListChangeListener.Change<? extends Integer> change) -> {
             if (change.getList().size() > 0) {
                 removeButton.setDisable(false);
             } else {
@@ -158,55 +158,12 @@ public class Controller {
         burnButton.setDisable(!isRunnable);
     }
 
-    protected void updateOutliers() {
-        ObservableList<Info> data = tracks.getItems();
-        final String ATN_STR = " - ?";
+    protected Info addTrack(File file) throws Exception {
+        Info trackInfo = tracks.addFile(file);
 
-        float totalBpm = 0;
-        int count = 0;
-
-        for (Info track : data) {
-            try {
-                totalBpm += Float.parseFloat(track.getBpm());
-                count++;
-            } catch (NumberFormatException e) {
-                continue;
-            }
+        if (trackInfo == null) {
+            return null;
         }
-
-        float avg = totalBpm / count;
-
-        for (Info track : data) {
-            try {
-                float bpm = Float.parseFloat(track.getBpm().replace(ATN_STR, ""));
-
-                if ((bpm > avg + avg * 0.1 || bpm < avg - avg * 0.1) && !track.getBpm().contains(ATN_STR)) {
-                    track.setBpm(track.getBpm() + ATN_STR);
-                } else if (track.getBpm().contains(ATN_STR) && (bpm <= avg + avg * 0.1 && bpm >= avg - avg * 0.1)) {
-                    track.setBpm(track.getBpm().replace(ATN_STR, ""));
-                }
-            } catch (NumberFormatException e) {
-                continue;
-            }
-        }
-    }
-
-    protected void addTrack(File file) throws Exception {
-        final ObservableList<Info> data = tracks.getItems();
-
-        final Info trackInfo = new Info(file, Info.NO_BPM);
-
-        for (Info track : data) {
-            if (track.getFile().getAbsolutePath().equals(trackInfo.getFile().getAbsolutePath())) {
-                return;
-            }
-        }
-
-        if (!file.getAbsolutePath().matches("\\A\\p{ASCII}*\\z")) {
-            throw new RuntimeException(file.getName() + " contains non ascii characters. This version of Kitchen Sync can not process this file, rename the file to add it.");
-        }
-
-        data.add(trackInfo);
 
         final AnalyserService analyzer = new AnalyserService(trackInfo);
         trackInfo.setService(analyzer);
@@ -216,7 +173,7 @@ public class Controller {
             trackInfo.setBpm(String.format("%.1f", (float) Math.round(bpm)));
 
             enableButtonsIfReady();
-            updateOutliers();
+            tracks.updateOutliers();
         });
         analyzer.setOnFailed((WorkerStateEvent workerStateEvent) -> {
             Helpers.handleError(workerStateEvent.getSource().getException());
@@ -225,13 +182,14 @@ public class Controller {
         analyzer.start();
 
         progressIndicator.visibleProperty().bind(analyzer.runningProperty());
+
+        return trackInfo;
     }
 
     @FXML
     protected void addFiles(ActionEvent event) {
         FileChooser fileChooser = new FileChooser();
-        FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("Audio files", new ArrayList<>(Arrays.asList("*.mp3", "*.wav")));
-        fileChooser.getExtensionFilters().add(extFilter);
+        fileChooser.getExtensionFilters().add(tracks.getExtensionFilter());
         List<File> files = fileChooser.showOpenMultipleDialog(stage);
 
         for (File file : files) {
@@ -257,6 +215,7 @@ public class Controller {
 
             if (dir != null) {
                 final ObservableList<Info> data = tracks.getItems();
+
                 for (final Info info : data) {
                     try {
                         final ProcessorService processor = new ProcessorService(info, Integer.parseInt(result.get()), dir);
@@ -287,9 +246,9 @@ public class Controller {
 
     @FXML
     protected void removeFiles(ActionEvent event) {
-        tracks.getItems().removeAll(tracks.getSelectionModel().getSelectedItems());
+        tracks.getItems().removeAll(tracksTable.getSelectionModel().getSelectedItems());
 
-        for (Info track : tracks.getSelectionModel().getSelectedItems()) {
+        for (Info track : tracksTable.getSelectionModel().getSelectedItems()) {
             if (track.getService().isRunning()) {
                 track.getService().cancel();
             }

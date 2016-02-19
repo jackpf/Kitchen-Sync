@@ -27,16 +27,16 @@
                        visible="false" />
                 </children>
             </HBox>
-            <TableView fx:id="tracks" GridPane.columnIndex="0"
+            <TableView fx:id="tracksTable" GridPane.columnIndex="0"
                        GridPane.rowIndex="1" editable="true">
                 <columnResizePolicy><TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/></columnResizePolicy>
                 <columns>
-                    <TableColumn fx:id="filename" text="Filename" prefWidth="250">
+                    <TableColumn fx:id="filenameColumn" text="Filename" prefWidth="250">
                         <cellValueFactory>
                             <PropertyValueFactory property="displayName" />
                         </cellValueFactory>
                     </TableColumn>
-                    <TableColumn fx:id="bpm" text="BPM" prefWidth="50">
+                    <TableColumn fx:id="bpmColumn" text="BPM" prefWidth="50">
                         <cellValueFactory>
                             <PropertyValueFactory property="bpm" />
                         </cellValueFactory>
@@ -44,7 +44,7 @@
                 </columns>
             </TableView>
             <fx:script>
-                tracks.getSelectionModel().setSelectionMode(javafx.scene.control.SelectionMode.MULTIPLE);
+                tracksTable.getSelectionModel().setSelectionMode(javafx.scene.control.SelectionMode.MULTIPLE);
             </fx:script>
         </children>
     </VBox>
