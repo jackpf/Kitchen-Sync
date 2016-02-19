@@ -58,7 +58,6 @@ void calculateFrequencyMagnitudes(const char *filename, float *frequencyMagnitud
 
     while (inFile.eof() == 0) {
         size_t samplesRead = inFile.read(sampleBuffer, BUFF_SIZE);
-        cerr<<"read " <<samplesRead<<" samples"<<endl;
 
         for (int i = 0; i < BUFF_SIZE; i++) {
             in[i][0] = (double) sampleBuffer[i];

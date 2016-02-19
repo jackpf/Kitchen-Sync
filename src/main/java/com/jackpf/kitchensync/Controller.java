@@ -108,6 +108,7 @@ public class Controller {
 
         bpmColumn.setCellFactory(TextFieldTableCell.<Info>forTableColumn());
         bpmColumn.setOnEditCommit(new EventHandler<TableColumn.CellEditEvent<Info, String>>() {
+            @Override
             public void handle(TableColumn.CellEditEvent<Info, String> event) {
                 try {
                     event.getRowValue().setBpm(String.format("%.1f", Float.parseFloat(event.getNewValue())));
@@ -118,7 +119,27 @@ public class Controller {
             }
         });
         tracksTable.setRowFactory(tv -> {
-            TableRow<Info> row = new TableRow<>();
+            TableRow<Info> row = new TableRow<Info>() {
+                @Override
+                protected void updateItem(Info info, boolean empty){
+                    super.updateItem(info, empty);
+
+                    if (info == null || empty || info.getQuality() == -1.0f) {
+                        return;
+                    }
+
+                    System.out.println("QUALITY: "+info.getDisplayName()+": "+info.getQuality());
+
+                    if (info.getQuality() <= 0.5) {
+                        getStyleClass().add("quality-low");
+                    } else if (info.getQuality() <= 0.75) {
+                        getStyleClass().add("quality-medium");
+                    } else {
+                        getStyleClass().add("quality-high");
+                    }
+                }
+            };
+
             row.setOnMouseClicked(event -> {
                 if (event.getClickCount() == 2 && (!row.isEmpty()) ) {
                     Info info = row.getItem();
@@ -129,6 +150,7 @@ public class Controller {
                     }
                 }
             });
+
             return row;
         });
         tracksTable.getSelectionModel().getSelectedIndices().addListener((ListChangeListener.Change<? extends Integer> change) -> {
@@ -174,6 +196,8 @@ public class Controller {
 
             enableButtonsIfReady();
             tracks.updateOutliers();
+
+            Helpers.redraw(tracksTable); // Needed to update row styles
         });
         analyzer.setOnFailed((WorkerStateEvent workerStateEvent) -> {
             Helpers.handleError(workerStateEvent.getSource().getException());
@@ -203,15 +227,10 @@ public class Controller {
 
     @FXML
     protected void save(ActionEvent event) {
-        TextInputDialog dialog = new TextInputDialog();
-        dialog.setTitle("Target BPM");
-        dialog.setHeaderText("Set target BPM");
-        dialog.setContentText("Enter target BPM:");
+        Optional<String> result = Helpers.prompt("Target BPM", "Set target BPM", "Enter target BPM:");
 
-        Optional<String> result = dialog.showAndWait();
         if (result.isPresent()){
-            FileChooser fileChooser = new FileChooser();
-            File dir = fileChooser.showSaveDialog(stage);
+            File dir = Helpers.promptDir(stage);
 
             if (dir != null) {
                 final ObservableList<Info> data = tracks.getItems();
