@@ -1,4 +1,4 @@
-package com.jackpf.kitchensync.executors;
+package com.jackpf.kitchensync.executor;
 
 import com.jackpf.kitchensync.Executor;
 

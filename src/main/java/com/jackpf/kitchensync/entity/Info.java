@@ -1,4 +1,4 @@
-package com.jackpf.kitchensync;
+package com.jackpf.kitchensync.entity;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.concurrent.Service;

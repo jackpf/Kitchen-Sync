@@ -1,5 +1,7 @@
 package com.jackpf.kitchensync;
 
+import com.jackpf.kitchensync.entity.Info;
+
 import java.util.Arrays;
 
 /**

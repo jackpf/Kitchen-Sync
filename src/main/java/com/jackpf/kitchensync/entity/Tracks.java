@@ -1,4 +1,4 @@
-package com.jackpf.kitchensync;
+package com.jackpf.kitchensync.entity;
 
 import javafx.collections.ObservableList;
 import javafx.stage.FileChooser;

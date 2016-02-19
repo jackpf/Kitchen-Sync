@@ -1,10 +1,10 @@
-package com.jackpf.kitchensync.services;
+package com.jackpf.kitchensync.service;
 
 import com.jackpf.kitchensync.CInterface.CInterface;
 import com.jackpf.kitchensync.Executor;
-import com.jackpf.kitchensync.Info;
+import com.jackpf.kitchensync.entity.Info;
 import com.jackpf.kitchensync.TagWriter;
-import com.jackpf.kitchensync.executors.FFMPEGExecutor;
+import com.jackpf.kitchensync.executor.FFMPEGExecutor;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import sun.awt.Mutex;

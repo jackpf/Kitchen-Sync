@@ -1,5 +1,9 @@
 package com.jackpf.kitchensync;
 
+import com.jackpf.kitchensync.entity.Info;
+import com.jackpf.kitchensync.entity.Tracks;
+import com.jackpf.kitchensync.service.AnalyserService;
+import com.jackpf.kitchensync.service.ProcessorService;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.concurrent.WorkerStateEvent;
