@@ -4,7 +4,6 @@ import com.jackpf.kitchensync.Executor;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.io.IOException;
-import java.net.URLDecoder;
 import java.util.List;
 
 /**
@@ -12,7 +11,8 @@ import java.util.List;
  */
 public class FFMPEGExecutor extends Executor {
     public FFMPEGExecutor() throws Exception {
-        super(URLDecoder.decode(ClassLoader.getSystemClassLoader().getResource("ffmpeg").getPath(), "UTF-8"), new String[]{"-y"});
+        //super(URLDecoder.decode(ClassLoader.getSystemClassLoader().getResource("ffmpeg").getPath(), "UTF-8"), new String[]{"-y"});
+        super("ffmpeg", new String[]{"-y"});
     }
 
     @Override

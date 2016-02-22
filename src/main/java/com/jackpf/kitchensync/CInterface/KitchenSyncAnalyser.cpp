@@ -51,8 +51,8 @@ void calculateFrequencyMagnitudes(const char *filename, float *frequencyMagnitud
     fftw_complex *in, *out;
     fftw_plan p;
 
-    in = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * BUFF_SIZE);
-    out = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * BUFF_SIZE);
+    in = (fftw_complex *) fftw_malloc(sizeof(fftw_complex) * BUFF_SIZE);
+    out = (fftw_complex *) fftw_malloc(sizeof(fftw_complex) * BUFF_SIZE);
 
     p = fftw_plan_dft_1d(BUFF_SIZE, in, out, FFTW_FORWARD, FFTW_ESTIMATE);
 
@@ -61,6 +61,7 @@ void calculateFrequencyMagnitudes(const char *filename, float *frequencyMagnitud
 
         for (int i = 0; i < BUFF_SIZE; i++) {
             in[i][0] = (double) sampleBuffer[i];
+            in[i][1] = 0.0; // Fuck's sake
         }
 
         fftw_execute(p); /* repeat as needed */

@@ -1,11 +1,11 @@
 .quality-low {
-    -fx-background-color: red;
+    -fx-text-fill: red;
 }
 
 .quality-medium {
-    -fx-background-color: orange;
+    -fx-text-fill: orange;
 }
 
 .quality-high {
-    /*-fx-background-color: white;*/
+    -fx-text-fill: white;
 }

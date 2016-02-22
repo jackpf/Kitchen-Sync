@@ -57,8 +57,6 @@ public class ProcessorService extends Service<Info> {
                             targetBpm
                     );
 
-                    trackInfo.getTmpFile().delete();
-
                     if (!trackInfo.getTmpFile2().exists()) {
                         throw new IOException("File " + trackInfo.getTmpFile2().getAbsolutePath() + " does not exist");
                     }
@@ -66,16 +64,14 @@ public class ProcessorService extends Service<Info> {
                     TagWriter.Tags tags = new TagWriter(trackInfo).getTags();
 
                     ffmpeg.run(new String[]{
-                            "-i",
-                            trackInfo.getTmpFile2().getAbsolutePath(),
-                            "-ab", "320k",
-                            "-ac", "2",
-                            "-metadata", "title=" + tags.name + "",
-                            "-metadata", "artist=" + tags.artist + "",
-                            outputDir.getParent() + "/" + trackInfo.getFile().getName()
+                        "-i",
+                        trackInfo.getTmpFile2().getAbsolutePath(),
+                        "-ab", "320k",
+                        "-ac", "2",
+                        "-metadata", "title=" + tags.name + "",
+                        "-metadata", "artist=" + tags.artist + "",
+                        outputDir.getParent() + "/" + trackInfo.getFile().getName()
                     });
-
-                    trackInfo.getTmpFile2().delete();
 
                     return trackInfo;
                 } finally {

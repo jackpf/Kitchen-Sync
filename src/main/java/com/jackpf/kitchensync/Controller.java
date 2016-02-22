@@ -122,11 +122,14 @@ public class Controller {
                 enableButtonsIfReady();
             }
         });
-        tracksTable.setRowFactory(tv -> {
-            TableRow<Info> row = new TableRow<Info>() {
+        filenameColumn.setCellFactory(tc -> {
+            return new TableCell<Info, String>() {
                 @Override
-                protected void updateItem(Info info, boolean empty){
-                    super.updateItem(info, empty);
+                protected void updateItem(String data, boolean empty){
+                    super.updateItem(data, empty);
+                    setText(data);
+
+                    Info info = (Info) getTableRow().getItem();
 
                     if (info == null || empty || info.getQuality() == -1.0f) {
                         return;
@@ -143,6 +146,9 @@ public class Controller {
                     }
                 }
             };
+        });
+        tracksTable.setRowFactory((TableView<Info> tv) -> {
+            TableRow<Info> row = new TableRow<>();
 
             row.setOnMouseClicked(event -> {
                 if (event.getClickCount() == 2 && (!row.isEmpty()) ) {

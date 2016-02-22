@@ -36,7 +36,7 @@ public class AnalyserService extends Service<Float> {
                 mutex.lock();
 
                 try {
-                    ffmpeg.run(new String[]{"-y", "-i", trackInfo.getFile().getAbsolutePath(), trackInfo.getTmpFile().getAbsolutePath()});
+                    ffmpeg.run(new String[]{"-i", trackInfo.getFile().getAbsolutePath(), trackInfo.getTmpFile().getAbsolutePath()});
 
                     if (!trackInfo.getTmpFile().exists()) {
                         throw new IOException("File " + trackInfo.getTmpFile().getAbsolutePath() + " does not exist");
@@ -44,15 +44,11 @@ public class AnalyserService extends Service<Float> {
 
                     float bpm = cInterface.getBpm(trackInfo.getTmpFile().getAbsolutePath());
 
-                    trackInfo.getTmpFile().delete();
-
                     ffmpeg.run(new String[]{"-i", trackInfo.getFile().getAbsolutePath(), "-ac", "1", trackInfo.getTmpFile2().getAbsolutePath()});
 
                     float quality = cInterface.getQuality(trackInfo.getTmpFile2().getAbsolutePath());
                     trackInfo.setQuality(quality);
                     System.out.println("Quality of " + trackInfo.getFilename() + ": " + quality);
-
-                    trackInfo.getTmpFile2().delete();
 
                     return bpm;
                 } finally {

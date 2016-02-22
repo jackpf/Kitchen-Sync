@@ -20,8 +20,22 @@ public class Executor {
     private String file;
     private String[] permanentArgs;
 
+    public Executor(String file) {
+        this(file, new String[]{});
+    }
+
+    public Executor(String file, String[] permanentArgs) /*throws Exception*/ {
+        this.file = file;//escape(file);
+        this.permanentArgs = escape(permanentArgs);
+    }
+
     private String escape(String s) {
-        return s.replaceAll(" ", "\\ ");
+        /*if (s.startsWith("-")) {
+            return s;
+        }
+
+        return s.replaceAll("([^\\w])", "\\\\$1");*/
+        return s;
     }
 
     private String[] escape(String[] sArray) {
@@ -32,22 +46,6 @@ public class Executor {
         }
 
         return r;
-    }
-
-    public Executor(String file) {
-        this(file, new String[]{});
-    }
-
-    public Executor(String file, String[] permanentArgs) /*throws Exception*/ {
-        this.file = escape(file);
-        this.permanentArgs = escape(permanentArgs);
-
-        /*Process p = Runtime.getRuntime().exec("which " + file);
-        p.waitFor();
-        BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
-        if (reader.readLine() == null) {
-            throw new RuntimeException("Could not find ffmpeg binary, is it installed?");
-        }*/
     }
 
     protected String[] buildCmd(String[] args) {
@@ -67,7 +65,7 @@ public class Executor {
         String line;
         List<String> lines = new ArrayList<>();
 
-        while ((line = reader.readLine())!= null) {
+        while ((line = reader.readLine()) != null) {
             System.out.println("Output (" + stream.getClass().getName() + "): " + line);
 
             lines.add(line);

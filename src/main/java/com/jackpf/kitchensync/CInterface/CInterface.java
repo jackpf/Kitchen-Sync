@@ -31,6 +31,10 @@ public class CInterface {
 
         System.out.println("BPM of " + args[0] + ": "  + bpm);
 
+        float quality = cInterface.getQuality(args[0]);
+
+        System.out.println("Quality: " + quality);
+
         cInterface.setBpm(args[0], args[1], bpm, Float.parseFloat(args[2]));
 
         System.out.println("Done");

@@ -30,11 +30,8 @@ public class Info {
     public Info(File file, String bpm) throws IOException {
         this.file = file;
         String hash = DigestUtils.sha1Hex(file.getPath() + new Timestamp(new Date().getTime()) + Math.random());
-        // Using java's generated tmp files causes issues when reading from kitchensync librarys
-        //this.tmpFile = File.createTempFile(hash, ".wav");
-        this.tmpFile = new File("/tmp/" + hash + ".wav");
-        //this.tmpFile2 = File.createTempFile(hash + "-2", ".wav");
-        this.tmpFile2 = new File("/tmp/" + hash + "-2.wav");
+        this.tmpFile = File.createTempFile(hash, ".wav");
+        this.tmpFile2 = File.createTempFile(hash + "-2", ".wav");
 
         setFilename(file.getAbsolutePath());
         setDisplayName(file.getName());

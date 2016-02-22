@@ -37,8 +37,8 @@
                 <configuration>
                     <executable>java</executable>
                     <arguments>
-                        <argument>-Djava.library.path=${project.basedir}/src/main/java/com/jackpf/kitchensync/CInterface</argument>
-                        <!--<argument>-Djava.library.path=/usr/local/lib</argument>-->
+                        <!--<argument>-Djava.library.path=${project.basedir}/src/main/java/com/jackpf/kitchensync/CInterface</argument>-->
+                        <argument>-Djava.library.path=/usr/local/lib</argument>
                         <argument>-classpath</argument>
                         <classpath />
                         <argument>com.jackpf.kitchensync.Main</argument>
