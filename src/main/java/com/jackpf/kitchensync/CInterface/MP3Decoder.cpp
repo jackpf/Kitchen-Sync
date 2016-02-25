@@ -5,133 +5,120 @@
 #include <iostream>
 
 extern "C" {
-#include "libavutil/mathematics.h"
-#include "libavformat/avformat.h"
-#include "libswscale/swscale.h"
-#include <ao/ao.h>
+    #include "libavutil/mathematics.h"
+    #include "libavformat/avformat.h"
+    #include "libswscale/swscale.h"
+    #include <ao/ao.h>
 }
+
+#include <soundtouch/SoundTouch.h>
+#include <soundtouch/BPMDetect.h>
+
+using namespace soundtouch;
 
 #define AVCODEC_MAX_AUDIO_FRAME_SIZE 192000
 
-void die(const char *msg)
-{
-    fprintf(stderr,"%s\n",msg);
-    exit(1);
+void setup(AVFormatContext **container, const char *filename) {
+    av_register_all();
+
+    *container = avformat_alloc_context();
+
+    if (avformat_open_input(container, filename, NULL, NULL) < 0){
+        throw std::runtime_error("Incorrect arguments");
+    }
+
+    if (avformat_find_stream_info(*container, NULL) < 0){
+        throw std::runtime_error("Could not find file info");
+    }
+
+    av_dump_format(*container, 0, filename, false);
 }
 
-int main(int argc, char *argv[])
-{
-
-    const char* input_filename=argv[1];
-
-    //avcodec_register_all();
-    av_register_all();
-    //av_ini
-
-    AVFormatContext* container=avformat_alloc_context();
-    if(avformat_open_input(&container,input_filename,NULL,NULL)<0){
-        die("Could not open file");
-    }
-
-    if(avformat_find_stream_info(container, NULL)<0){
-        die("Could not find file info");
-    }
-    av_dump_format(container,0,input_filename,false);
-
-    int stream_id=-1;
-    int i;
-    for(i=0;i<container->nb_streams;i++){
-        if(container->streams[i]->codec->codec_type==AVMEDIA_TYPE_AUDIO){
-            stream_id=i;
-            break;
+int findAudioStream(AVFormatContext *container) {
+    for(int i = 0; i < container->nb_streams; i++) {
+        if(container->streams[i]->codec->codec_type == AVMEDIA_TYPE_AUDIO) {
+            return i;
         }
     }
-    if(stream_id==-1){
-        die("Could not find Audio Stream");
+
+    throw std::runtime_error("Could not find Audio Stream");
+}
+
+int main(int argc, char *argv[]) {
+    if (argc < 2) {
+        throw std::runtime_error("Incorrect arguments");
     }
 
-    AVDictionary *metadata=container->metadata;
+    AVFormatContext *container;
+    AVCodecContext *context;
+    AVCodec *codec;
+    int streamId;
 
-    AVCodecContext *ctx=container->streams[stream_id]->codec;
-    AVCodec *codec=avcodec_find_decoder(ctx->codec_id);
+    setup(&container, argv[1]);
+    streamId = findAudioStream(container);
 
-    if(codec==NULL){
-        die("cannot find codec!");
+    context = container->streams[streamId]->codec;
+    codec = avcodec_find_decoder(context->codec_id);
+
+    if (codec == NULL || avcodec_open2(context, codec, NULL) < 0) {
+        throw std::runtime_error("Codec cannot be found");
     }
-
-    if(avcodec_open2(ctx,codec, NULL)<0){
-        die("Codec cannot be found");
-    }
-
-    //ctx=avcodec_alloc_context3(codec);
-
-    //initialize AO lib
-    ao_initialize();
-
-    int driver=ao_default_driver_id();
-
-    ao_sample_format sformat;
-    AVSampleFormat sfmt=ctx->sample_fmt;
-    if(sfmt==AV_SAMPLE_FMT_U8){
-        printf("U8\n");
-
-        sformat.bits=8;
-    }else if(sfmt==AV_SAMPLE_FMT_S16){
-        printf("S16\n");
-        sformat.bits=16;
-    }else if(sfmt==AV_SAMPLE_FMT_S32){
-        printf("S32\n");
-        sformat.bits=32;
-    }
-
-    sformat.channels=ctx->channels;
-    sformat.rate=ctx->sample_rate;
-    sformat.byte_format=AO_FMT_NATIVE;
-    sformat.matrix=0;
-
-    ao_device *adevice=ao_open_live(driver,&sformat,NULL);
-    //end of init AO LIB
 
     AVPacket packet;
+    AVFrame *frame;
+    int bufSize;
+    int frameFinished;
+
+    bufSize = AVCODEC_MAX_AUDIO_FRAME_SIZE + FF_INPUT_BUFFER_PADDING_SIZE;
+    uint8_t buffer[bufSize];
+
     av_init_packet(&packet);
+    frame = av_frame_alloc();
 
-    AVFrame *frame=av_frame_alloc();
+    packet.data = buffer;
+    packet.size = bufSize;
 
+    int nChannels = container->streams[streamId]->codec->channels;
+    int sampleRate = container->streams[streamId]->codec->sample_rate;
 
+    BPMDetect *bpmDetector = new BPMDetect(nChannels, sampleRate);
 
-    int buffer_size=AVCODEC_MAX_AUDIO_FRAME_SIZE+ FF_INPUT_BUFFER_PADDING_SIZE;;
-    uint8_t buffer[buffer_size];
-    packet.data=buffer;
-    packet.size =buffer_size;
+    FILE *outfile = fopen("/Users/jackfarrelly/out.pcm", "w");
 
+    while (av_read_frame(container, &packet) >= 0) {
+        if (packet.stream_index == streamId) {
+            int len;
+            int samples;
 
+            len = avcodec_decode_audio4(context, frame, &frameFinished, &packet);
 
-    int len;
-    int frameFinished=0;
-    while(av_read_frame(container,&packet)>=0)
-    {
-        //printf("%d = %d\n", packet.stream_index, stream_id);
-        if(packet.stream_index==stream_id){
-            //printf("Audio Frame read  \n");
-            int len=avcodec_decode_audio4(ctx,frame,&frameFinished,&packet);
-            //frame->
-            if(frameFinished){
-                //printf("Frame: %s\n", frame->extended_data[0]);
-                //printf("Finished reading Frame len : %d , nb_samples:%d buffer_size:%d line size: %d \n",len,frame->nb_samples,buffer_size,frame->linesize[0]);
-                //ao_play(adevice, (char*)frame->extended_data[0],frame->linesize[0] );
-                printAudioFrameInfo(ctx, frame);
-            }else{
+            if (frameFinished) {
+                for (int i = 0; i < frame->nb_samples; i++) {
+                    //printf("Sample: L=%d, R=%d\n", frame->data[0][i], frame->data[1][i]);
+                }
+
+                //samples = len / nChannels;
+
+                //bpmDetector->inputSamples(frame->data[0], samples);
+                int data_size = av_get_bytes_per_sample(context->sample_fmt);
+                if (data_size < 0) {
+                    /* This should not occur, checking just for paranoia */
+                    fprintf(stderr, "Failed to calculate data size\n");
+                    exit(1);
+                }
+                for (int i=0; i<frame->nb_samples; i++)
+                    for (int ch=0; ch<context->channels; ch++)
+                        fwrite(frame->data[ch] + data_size*i, 1, data_size, outfile);
+            } else {
                 printf("Not Finished\n");
             }
 
-        }else {
-            printf("Someother packet possibly Video\n");
         }
-
-
     }
 
+    //printf("BPM: %f\n", bpmDetector->getBpm());
+
     avformat_close_input(&container);
-    ao_shutdown();
+
     return 0;
 }

@@ -12,6 +12,8 @@ using namespace soundtouch;
 
 #define BUFF_SIZE           6720
 #define MAX_FREQ            22//KHz
+#define MIN_AN_FREQ         16//KHz
+#define MAX_AN_FREQ         20//KHz
 
 static void calculateFrequencies(fftw_complex *data, size_t len, int Fs, float *frequencyMagnitudes) {
     for (int i = 0; i < len; i++) {
@@ -25,7 +27,7 @@ static void calculateFrequencies(fftw_complex *data, size_t len, int Fs, float *
         magnitude = sqrt(re * re + im * im);
         freq = i * Fs / len;
 
-        index = round(freq / 1000.0);
+        index = floor(freq / 1000.0);
         if (index <= MAX_FREQ) {
             frequencyMagnitudes[index] += magnitude;
         }
@@ -77,7 +79,7 @@ void calculateFrequencyMagnitudes(const char *filename, float *frequencyMagnitud
  float analyse(const char *filename) {
     float fm[MAX_FREQ + 1] = {0};
     int score = 0, max = 0;
-    int threshhold = 1000; // This should be some kind of percentage of the sum of the magnitudes
+    int threshhold = 0;//1000; // This should be some kind of percentage of the sum of the magnitudes
 
     calculateFrequencyMagnitudes(filename, fm);
 
@@ -85,7 +87,7 @@ void calculateFrequencyMagnitudes(const char *filename, float *frequencyMagnitud
         fprintf(stderr, "%dKHz magnitude: %f\n", i, fm[i]);
     }
 
-    for (int i = 16; i <= 20; i += 2) {
+    for (int i = MIN_AN_FREQ; i <= MAX_AN_FREQ; i += 2) {
         if (fm[i] > threshhold) {
             score++;
         }
