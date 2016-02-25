@@ -44,9 +44,7 @@ public class AnalyserService extends Service<Float> {
 
                     float bpm = cInterface.getBpm(trackInfo.getTmpFile().getAbsolutePath());
 
-                    ffmpeg.run(new String[]{"-i", trackInfo.getFile().getAbsolutePath(), "-ac", "1", trackInfo.getTmpFile2().getAbsolutePath()});
-
-                    float quality = cInterface.getQuality(trackInfo.getTmpFile2().getAbsolutePath());
+                    float quality = cInterface.getQuality(trackInfo.getTmpFile().getAbsolutePath());
                     trackInfo.setQuality(quality);
                     System.out.println("Quality of " + trackInfo.getFilename() + ": " + quality);
 

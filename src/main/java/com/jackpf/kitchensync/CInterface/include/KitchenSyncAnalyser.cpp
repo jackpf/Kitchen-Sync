@@ -4,7 +4,7 @@ KitchenSyncAnalyser::KitchenSyncAnalyser(const char *filename) :
     BUFF_SIZE(6720),
     MAX_FREQ(22),
     MIN_AN_FREQ(16),
-    MAX_AN_FREQ(22) {
+    MAX_AN_FREQ(20) {
     this->filename = filename;
     inFile = new WavInFile(filename);
     frequencyMagnitudes = new float[MAX_FREQ + 1];

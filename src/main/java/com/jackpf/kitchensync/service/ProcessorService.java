@@ -51,10 +51,10 @@ public class ProcessorService extends Service<Info> {
                     }
 
                     cInterface.setBpm(
-                            trackInfo.getTmpFile().getAbsolutePath(),
-                            trackInfo.getTmpFile2().getAbsolutePath(),
-                            Float.parseFloat(trackInfo.getBpm()),
-                            targetBpm
+                        trackInfo.getTmpFile().getAbsolutePath(),
+                        trackInfo.getTmpFile2().getAbsolutePath(),
+                        Float.parseFloat(trackInfo.getBpm()),
+                        targetBpm
                     );
 
                     if (!trackInfo.getTmpFile2().exists()) {
