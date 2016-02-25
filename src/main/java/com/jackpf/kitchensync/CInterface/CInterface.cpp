@@ -19,7 +19,8 @@ static void throwException(JNIEnv *env, const std::runtime_error &e) {
 JNIEXPORT jstring JNICALL Java_com_jackpf_kitchensync_CInterface_CInterface_getVersion
   (JNIEnv *env, jobject obj)
 {
-    return env->NewStringUTF(KitchenSync::getVersion());
+    KitchenSync ks(nullptr);
+    return env->NewStringUTF(ks.getVersion());
 }
 
 JNIEXPORT jfloat JNICALL Java_com_jackpf_kitchensync_CInterface_CInterface_getBpm
@@ -31,7 +32,10 @@ JNIEXPORT jfloat JNICALL Java_com_jackpf_kitchensync_CInterface_CInterface_getBp
     filename = env->GetStringUTFChars(jFilename, 0);
 
     try {
-        bpm = KitchenSync::getBpm(filename);
+        RunParameters params;
+        params.inFileName = filename;
+        KitchenSync ks(&params);
+        bpm = ks.getBpm();
     } catch (const std::runtime_error &e) {
         throwException(env, e);
     }
@@ -51,7 +55,11 @@ JNIEXPORT void JNICALL Java_com_jackpf_kitchensync_CInterface_CInterface_setBpm
     outFilename = env->GetStringUTFChars(jOutFilename, 0);
 
     try {
-        KitchenSync::setBpm(inFilename, outFilename, (float) fromBpm, (float) toBpm);
+        RunParameters params;
+        params.inFileName = inFilename;
+        params.outFileName = outFilename;
+        KitchenSync ks(&params);
+        ks.setBpm((float) fromBpm, (float) toBpm);
     } catch (const std::runtime_error &e) {
         throwException(env, e);
     }
@@ -69,7 +77,10 @@ JNIEXPORT jfloat JNICALL Java_com_jackpf_kitchensync_CInterface_CInterface_getQu
     filename = env->GetStringUTFChars(jFilename, 0);
 
     try {
-        quality = KitchenSync::getQuality(filename);
+        RunParameters params;
+        params.inFileName = filename;
+        KitchenSync ks(&params);
+        quality = ks.getQuality();
     } catch (const std::runtime_error &e) {
         throwException(env, e);
     }

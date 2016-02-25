@@ -21,18 +21,21 @@ int main(int argc, char *argv[]) {
     }
 
     try {
-        const char *version = KitchenSync::getVersion();
-        printf("Soundtouch lib version: %s\n", version);
+        RunParameters params;
 
-        float bpm = KitchenSync::getBpm(argv[1]);
+        params.inFileName = argv[1];
+        params.outFileName = argv[2];
 
+        KitchenSync ks(&params);
+
+        printf("Soundtouch lib version: %s\n", ks.getVersion());
+
+        float bpm = ks.getBpm();
         printf("BPM of %s: %f'n\n", argv[1], bpm);
 
-        float quality = KitchenSync::getQuality(argv[1]);
+        printf("Quality of %s: %f\n", argv[1], ks.getQuality());
 
-        printf("Quality of %s: %f\n", argv[1], quality);
-
-        KitchenSync::setBpm(argv[1], argv[2], bpm, std::stof(argv[3]));
+        ks.setBpm(bpm, std::stof(argv[3]));
 
         printf("Wrote to %s\n", argv[2]);
     } catch (const std::runtime_error &e) {

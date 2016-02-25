@@ -7,33 +7,41 @@
 #include "WavFile.h"
 #include "KitchenSyncAnalyser.h"
 
-namespace KitchenSync
-{
-    using namespace soundtouch;
+using namespace soundtouch;
 
-    // Processing chunk size (size chosen to be divisible by 2, 4, 6, 8, 10, 12, 14, 16 channels ...)
-    #define BUFF_SIZE           6720
+typedef struct {
+    const char  *inFileName     = nullptr;
+    const char  *outFileName    = nullptr;
+    float       tempoDelta      = 0.0;
+    float       pitchDelta      = 0.0;
+    float       rateDelta       = 0.0;
+    int         quick           = 0;
+    int         noAntiAlias     = 0;
+    float       goalBPM         = 0.0;
+    //bool        detectBPM;
+    bool        speech          = false;
+} RunParameters;
 
-    static SoundTouch soundTouch;
+class KitchenSync {
+private:
+    const int BUFF_SIZE;
 
-    typedef struct {
-        const char  *inFileName;
-        const char  *outFileName;
-        float       tempoDelta;
-        float       pitchDelta;
-        float       rateDelta;
-        int         quick;
-        int         noAntiAlias;
-        float       goalBPM;
-        //bool        detectBPM;
-        bool        speech;
-    } RunParameters;
+    SoundTouch *soundTouch;
+    RunParameters *params;
+
+    WavInFile *inFile;
+    WavOutFile *outFile;
+
+    void openFiles();
+    void process();
+
+public:
+    KitchenSync(RunParameters *params);
+    ~KitchenSync();
 
     const char *getVersion();
-
-    float getBpm(const char *filename);
-
-    void setBpm(const char *inFilename, const char *outFilename, float fromBpm, float toBpm);
-
-    float getQuality(const char *filename);
-}
+    void printInfo();
+    float getBpm();
+    void setBpm(float fromBpm, float toBpm);
+    float getQuality();
+};
