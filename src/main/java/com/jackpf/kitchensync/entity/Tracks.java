@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Created by jackfarrelly on 19/02/2016.
@@ -14,12 +15,22 @@ import java.util.Arrays;
 public class Tracks {
     private ObservableList<Info> tracks;
 
+    private final List<String> extensions = new ArrayList<>(Arrays.asList("*.mp3", "*.wav", "*.aif", "*.flac"));
+
     public Tracks(ObservableList<Info> tracks) {
         this.tracks = tracks;
     }
 
     public Info addFile(File file) throws IOException {
-        if (!file.getName().toLowerCase().endsWith(".mp3") && !file.getName().toLowerCase().endsWith(".wav")) {
+        boolean allowed = false;
+
+        for (String ext : extensions) {
+            if (file.getName().toLowerCase().endsWith(ext.replaceAll("\\*", ""))) {
+                allowed = true;
+            }
+        }
+
+        if (!allowed) {
             return null;
         }
 
@@ -73,7 +84,7 @@ public class Tracks {
     }
 
     public FileChooser.ExtensionFilter getExtensionFilter() {
-        return new FileChooser.ExtensionFilter("Audio files", new ArrayList<>(Arrays.asList("*.mp3", "*.wav")));
+        return new FileChooser.ExtensionFilter("Audio files", extensions);
     }
 
     public ObservableList<Info> getItems() {
