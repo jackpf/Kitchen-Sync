@@ -14,7 +14,7 @@ namespace KitchenSync {
         samplerate = (int) (*inFile)->getSampleRate();
         channels = (int) (*inFile)->getNumChannels();
 
-        if (params->outFileName && *outFile != nullptr) {
+        if (*outFile != nullptr) {
             *outFile = new WavOutFile(params->outFileName, samplerate, bits, channels);
         }
     }
@@ -195,6 +195,12 @@ namespace KitchenSync {
     }
 
     float getQuality(const char *filename) {
-        return analyse(filename);
+        KitchenSyncAnalyser *analyser = new KitchenSyncAnalyser(filename);
+        analyser->printInfo();
+        float quality = analyser->analyse();
+        analyser->printMagnitudes();
+
+        delete analyser;
+        return quality;
     }
 }

@@ -19,5 +19,5 @@ link_directories(
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin")
 
-add_executable(kstest Test.cpp ../KitchenSync.cpp ../KitchenSyncAnalyser.cpp ../include/WavFile.cpp ../include/RunParameters.cpp)
+add_executable(kstest Test.cpp ../KitchenSync.cpp ../include/KitchenSyncAnalyser.cpp ../include/WavFile.cpp)
 target_link_libraries(kstest soundtouch fftw3 m)
