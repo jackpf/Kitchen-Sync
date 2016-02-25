@@ -12,7 +12,7 @@ KitchenSyncAnalyser::KitchenSyncAnalyser(const char *filename) :
     fill_n(frequencyMagnitudes, MAX_FREQ + 1, 0.0);
 
     if (inFile->getNumChannels() > 1) {
-        throw new runtime_error("This version only works on mono files :(");
+        //throw new runtime_error("This version only works on mono files :(");
     }
 }
 
@@ -56,7 +56,8 @@ void KitchenSyncAnalyser::calculateFrequencies(fftw_complex *data, size_t len, i
 }
 
 void KitchenSyncAnalyser::calculateFrequencyMagnitudes() {
-    SAMPLETYPE sampleBuffer[BUFF_SIZE];
+    assert(inFile->getNumChannels() == 1 || inFile->getNumChannels() == 2);
+    SAMPLETYPE sampleBuffer[BUFF_SIZE * inFile->getNumChannels()];
 
     fftw_complex *in, *out;
     fftw_plan p;
@@ -67,16 +68,22 @@ void KitchenSyncAnalyser::calculateFrequencyMagnitudes() {
     p = fftw_plan_dft_1d(BUFF_SIZE, in, out, FFTW_FORWARD, FFTW_ESTIMATE);
 
     while (inFile->eof() == 0) {
-        size_t samplesRead = inFile->read(sampleBuffer, BUFF_SIZE);
+        size_t samplesRead = inFile->read(sampleBuffer, BUFF_SIZE * inFile->getNumChannels());
 
-        for (int i = 0; i < BUFF_SIZE; i++) {
-            in[i][0] = (double) sampleBuffer[i];
+        for (int i = 0, j = 0; j < samplesRead; i++, j += inFile->getNumChannels()) {
+            // Convert to mono if necessary
+            if (inFile->getNumChannels() == 2) {
+                in[i][0] = (double) (sampleBuffer[j] + sampleBuffer[j + 1]) / 2.0;
+            } else {
+                in[i][0] = (double) sampleBuffer[j];
+            }
+
             in[i][1] = 0.0; // Fuck's sake
         }
 
         fftw_execute(p); /* repeat as needed */
 
-        calculateFrequencies(out, samplesRead, inFile->getSampleRate());
+        calculateFrequencies(out, samplesRead / inFile->getNumChannels(), inFile->getSampleRate());
     }
 
     fftw_destroy_plan(p);

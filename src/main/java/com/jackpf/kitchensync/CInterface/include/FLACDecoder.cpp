@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <iostream>
 
 #include <FLAC++/decoder.h>
 #include <share/compat.h>
@@ -32,102 +33,26 @@ static bool write_little_endian_uint32(FILE *f, FLAC__uint32 x)
 	;
 }
 
-class OurDecoder: public FLAC::Decoder::File {
-public:
-	OurDecoder(FILE *f_): FLAC::Decoder::File(), f(f_) { }
-protected:
-	FILE *f;
-
-	virtual ::FLAC__StreamDecoderWriteStatus write_callback(const ::FLAC__Frame *frame, const FLAC__int32 * const buffer[]);
-	virtual void metadata_callback(const ::FLAC__StreamMetadata *metadata);
-	virtual void error_callback(::FLAC__StreamDecoderErrorStatus status);
-private:
-	OurDecoder(const OurDecoder&);
-	OurDecoder&operator=(const OurDecoder&);
-};
-
-int main(int argc, char *argv[])
-{
-	bool ok = true;
-	FILE *fout;
-
-	if(argc != 3) {
-		fprintf(stderr, "usage: %s infile.flac outfile.wav\n", argv[0]);
-		return 1;
-	}
-
-	if((fout = fopen(argv[2], "wb")) == NULL) {
-		fprintf(stderr, "ERROR: opening %s for output\n", argv[2]);
-		return 1;
-	}
-
-	OurDecoder decoder(fout);
-
-	if(!decoder) {
-		fprintf(stderr, "ERROR: allocating decoder\n");
-		fclose(fout);
-		return 1;
-	}
-
-	(void)decoder.set_md5_checking(true);
-
-	FLAC__StreamDecoderInitStatus init_status = decoder.init(argv[1]);
-	if(init_status != FLAC__STREAM_DECODER_INIT_STATUS_OK) {
-		fprintf(stderr, "ERROR: initializing decoder: %s\n", FLAC__StreamDecoderInitStatusString[init_status]);
-		ok = false;
-	}
-
-	if(ok) {
-		ok = decoder.process_until_end_of_stream();
-		fprintf(stderr, "decoding: %s\n", ok? "succeeded" : "FAILED");
-		fprintf(stderr, "   state: %s\n", decoder.get_state().resolved_as_cstring(decoder));
-	}
-
-	fclose(fout);
-
-	return 0;
+FLACDecoder::FLACDecoder(const char *filename) {
+    set_md5_checking(true);
 }
 
-::FLAC__StreamDecoderWriteStatus OurDecoder::write_callback(const ::FLAC__Frame *frame, const FLAC__int32 * const buffer[])
+::FLAC__StreamDecoderWriteStatus OurDecoder::write_callback(const ::FLAC__Frame *frame, const FLAC__int32 *const buffer[])
 {
-	const FLAC__uint32 total_size = (FLAC__uint32)(total_samples * channels * (bps/8));
+	const FLAC__uint32 total_size = (FLAC__uint32) (total_samples * channels * (bps / 8));
 	size_t i;
 
 	if(total_samples == 0) {
-		fprintf(stderr, "ERROR: this example only works for FLAC files that have a total_samples count in STREAMINFO\n");
-		return FLAC__STREAM_DECODER_WRITE_STATUS_ABORT;
+	    throw std::runtime_error("No total_samples count in STREAMINFO");
 	}
 	if(channels != 2 || bps != 16) {
-		fprintf(stderr, "ERROR: this example only supports 16bit stereo streams\n");
-		return FLAC__STREAM_DECODER_WRITE_STATUS_ABORT;
+	    throw std::runtime_error("Only 16 bit stereo streams supported");
 	}
 
-	/* write WAVE header before we write the first frame */
-	if(frame->header.number.sample_number == 0) {
-		if(
-			fwrite("RIFF", 1, 4, f) < 4 ||
-			!write_little_endian_uint32(f, total_size + 36) ||
-			fwrite("WAVEfmt ", 1, 8, f) < 8 ||
-			!write_little_endian_uint32(f, 16) ||
-			!write_little_endian_uint16(f, 1) ||
-			!write_little_endian_uint16(f, (FLAC__uint16)channels) ||
-			!write_little_endian_uint32(f, sample_rate) ||
-			!write_little_endian_uint32(f, sample_rate * channels * (bps/8)) ||
-			!write_little_endian_uint16(f, (FLAC__uint16)(channels * (bps/8))) || /* block align */
-			!write_little_endian_uint16(f, (FLAC__uint16)bps) ||
-			fwrite("data", 1, 4, f) < 4 ||
-			!write_little_endian_uint32(f, total_size)
-		) {
-			fprintf(stderr, "ERROR: write error\n");
-			return FLAC__STREAM_DECODER_WRITE_STATUS_ABORT;
-		}
-	}
-
-	/* write decoded PCM samples */
 	for(i = 0; i < frame->header.blocksize; i++) {
 		if(
-			!write_little_endian_int16(f, (FLAC__int16)buffer[0][i]) ||  /* left channel */
-			!write_little_endian_int16(f, (FLAC__int16)buffer[1][i])     /* right channel */
+			!write_little_endian_int16(f, (FLAC__int16) buffer[0][i]) ||  /* left channel */
+			!write_little_endian_int16(f, (FLAC__int16) buffer[1][i])     /* right channel */
 		) {
 			fprintf(stderr, "ERROR: write error\n");
 			return FLAC__STREAM_DECODER_WRITE_STATUS_ABORT;
@@ -157,4 +82,29 @@ void OurDecoder::metadata_callback(const ::FLAC__StreamMetadata *metadata)
 void OurDecoder::error_callback(::FLAC__StreamDecoderErrorStatus status)
 {
 	fprintf(stderr, "Got error callback: %s\n", FLAC__StreamDecoderErrorStatusString[status]);
+}
+
+int main(int argc, char *argv[])
+{
+	if(argc < 2) {
+		fprintf(stderr, "usage: %s infile.flac\n", argv[0]);
+		return 1;
+	}
+
+	FLACDecoder decoder;
+
+    FLAC__StreamDecoderInitStatus status = decoder.init(filename);
+
+    if (status != FLAC__STREAM_DECODER_INIT_STATUS_OK) {
+        throw std::runtime_error(std::string("ERROR: initializing decoder: ") + std::string(FLAC__StreamDecoderInitStatusString[init_status]));
+    }
+
+    if (decoder.process_until_end_of_stream()) {
+        fprintf(stderr, "decoding: succeeded\n");
+        fprintf(stderr, "   state: %s\n", decoder.get_state().resolved_as_cstring(decoder));
+    } else {
+        throw std::runtime_error("Decoding failed");
+    }
+
+	return 0;
 }
