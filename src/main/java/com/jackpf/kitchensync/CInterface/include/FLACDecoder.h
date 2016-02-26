@@ -12,9 +12,9 @@
 
 class FLACDecoder: public FLAC::Decoder::File, public AudioInFile {
 public:
-	FLACDecoder(const char *filename);
+    FLACDecoder(const char *filename);
 
-	int eof() const;
+    int eof() const;
     int read(float *buf, int len);
     uint getNumChannels() const;
     uint getSampleRate() const;
@@ -30,11 +30,11 @@ protected:
     std::vector<FLAC__uint16> data;
     unsigned int ptr = 0;
 
-	void write_little_endian_uint16(FLAC__uint16 x);
+    void write_little_endian_uint16(FLAC__uint16 x);
 
-	::FLAC__StreamDecoderWriteStatus write_callback(const ::FLAC__Frame *frame, const FLAC__int32 * const buffer[]);
-	void metadata_callback(const ::FLAC__StreamMetadata *metadata);
-	void error_callback(::FLAC__StreamDecoderErrorStatus status);
+    ::FLAC__StreamDecoderWriteStatus write_callback(const ::FLAC__Frame *frame, const FLAC__int32 * const buffer[]);
+    void metadata_callback(const ::FLAC__StreamMetadata *metadata);
+    void error_callback(::FLAC__StreamDecoderErrorStatus status);
 };
 
 #endif
