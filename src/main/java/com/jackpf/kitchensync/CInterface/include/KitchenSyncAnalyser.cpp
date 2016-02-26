@@ -6,7 +6,7 @@ KitchenSyncAnalyser::KitchenSyncAnalyser(const char *filename) :
     MIN_AN_FREQ(16),
     MAX_AN_FREQ(20) {
     this->filename = filename;
-    inFile = new WavInFile(filename);
+    inFile = AudioFileFactory::createAudioInFile(filename);
     frequencyMagnitudes = new float[MAX_FREQ + 1];
 
     fill_n(frequencyMagnitudes, MAX_FREQ + 1, 0.0);
@@ -68,7 +68,7 @@ void KitchenSyncAnalyser::calculateFrequencyMagnitudes() {
     p = fftw_plan_dft_1d(BUFF_SIZE, in, out, FFTW_FORWARD, FFTW_ESTIMATE);
 
     while (inFile->eof() == 0) {
-        size_t samplesRead = inFile->read(sampleBuffer, BUFF_SIZE * inFile->getNumChannels());
+        size_t samplesRead = inFile->read(sampleBuffer, BUFF_SIZE *inFile->getNumChannels());
 
         for (int i = 0, j = 0; j < samplesRead; i++, j += inFile->getNumChannels()) {
             // Convert to mono if necessary

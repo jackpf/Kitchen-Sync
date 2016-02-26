@@ -16,7 +16,7 @@ static void throwException(const std::runtime_error &e) {
 
 int main(int argc, char *argv[]) {
     if (argc < 4) {
-        fprintf(stderr, "Usage: kstest <inFile> <outFile> <targetBpm>\n");
+        fprintf(stderr, "Usage: %s <inFile> <outFile> <targetBpm>\n", argv[0]);
         return -1;
     }
 

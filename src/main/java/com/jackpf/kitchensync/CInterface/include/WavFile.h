@@ -49,6 +49,8 @@
 
 #include <stdio.h>
 
+#include "AudioFile.h"
+
 #ifndef uint
 typedef unsigned int uint;
 #endif           
@@ -119,7 +121,7 @@ protected:
 
 
 /// Class for reading WAV audio files.
-class WavInFile : protected WavFileBase
+class WavInFile : protected WavFileBase, public AudioInFile
 {
 private:
     /// File pointer.

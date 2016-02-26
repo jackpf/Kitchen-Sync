@@ -4,6 +4,7 @@ import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextInputDialog;
+import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
@@ -47,7 +48,7 @@ public class Helpers {
     }
 
     public static File promptDir(Stage stage) {
-        FileChooser fileChooser = new FileChooser();
-        return fileChooser.showSaveDialog(stage);
+        DirectoryChooser directoryChooser = new DirectoryChooser();
+        return directoryChooser.showDialog(stage);
     }
 }

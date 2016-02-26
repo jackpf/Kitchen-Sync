@@ -7,6 +7,8 @@
 #include <fftw3.h>
 #include <soundtouch/SoundTouch.h>
 #include "WavFile.h"
+#include "FLACDecoder.h"
+#include "AudioFile.h"
 
 using namespace std;
 using namespace soundtouch;
@@ -14,7 +16,7 @@ using namespace soundtouch;
 class KitchenSyncAnalyser {
 private:
     const char *filename;
-    WavInFile *inFile;
+    AudioInFile *inFile;
     float *frequencyMagnitudes;
 
     void calculateFrequencies(fftw_complex *data, size_t len, int Fs);

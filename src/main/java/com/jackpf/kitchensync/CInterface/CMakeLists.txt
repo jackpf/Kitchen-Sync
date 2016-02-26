@@ -3,7 +3,7 @@
 cmake_minimum_required(VERSION 2.8.4)
 project(KitchenSync)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -shared")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -shared")
 add_definitions("-Wall")
 
 include_directories(
@@ -18,8 +18,12 @@ link_directories(
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}")
 
-add_executable(libkitchensync.dylib CInterface.cpp KitchenSync.cpp include/KitchenSyncAnalyser.cpp include/WavFile.cpp)
-target_link_libraries(libkitchensync.dylib soundtouch fftw3 m)
+file(GLOB includes
+    "include/*.cpp"
+)
+
+add_executable(libkitchensync.dylib CInterface.cpp KitchenSync.cpp ${includes})
+target_link_libraries(libkitchensync.dylib soundtouch fftw3 m flac flac++)
 
 # Install targets
 install(TARGETS libkitchensync.dylib DESTINATION /usr/local/lib/)

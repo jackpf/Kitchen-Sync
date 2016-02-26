@@ -70,7 +70,7 @@ public class ProcessorService extends Service<Info> {
                         "-ac", "2",
                         "-metadata", "title=" + tags.name + "",
                         "-metadata", "artist=" + tags.artist + "",
-                        outputDir.getParent() + "/" + trackInfo.getFile().getName()
+                        outputDir + "/" + trackInfo.getFile().getName()
                     });
 
                     return trackInfo;

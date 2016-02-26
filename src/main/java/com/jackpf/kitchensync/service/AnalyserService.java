@@ -43,10 +43,9 @@ public class AnalyserService extends Service<Float> {
                     }
 
                     float bpm = cInterface.getBpm(trackInfo.getTmpFile().getAbsolutePath());
-
                     float quality = cInterface.getQuality(trackInfo.getTmpFile().getAbsolutePath());
+
                     trackInfo.setQuality(quality);
-                    System.out.println("Quality of " + trackInfo.getFilename() + ": " + quality);
 
                     return bpm;
                 } finally {

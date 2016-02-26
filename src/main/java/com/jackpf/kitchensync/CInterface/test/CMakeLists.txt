@@ -19,5 +19,12 @@ link_directories(
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin")
 
-add_executable(kstest Test.cpp ../KitchenSync.cpp ../include/KitchenSyncAnalyser.cpp ../include/WavFile.cpp)
-target_link_libraries(kstest soundtouch fftw3 m)
+file(GLOB includes
+    "../include/*.cpp"
+)
+
+add_executable(kstest Test.cpp ../KitchenSync.cpp ${includes})
+target_link_libraries(kstest soundtouch fftw3 m flac flac++)
+
+add_executable(flactest FLACTest.cpp ${includes})
+target_link_libraries(flactest soundtouch fftw3 m flac flac++)
