@@ -49,18 +49,18 @@ uint FLACDecoder::getNumSamples() const {
     size_t i;
 
     if(total_samples == 0) {
-        fprintf(stderr, "ERROR: this example only works for FLAC files that have a total_samples count in STREAMINFO\n");
+        fprintf(stderr, "Error: no sample_count in STREAMINFO\n");
         return FLAC__STREAM_DECODER_WRITE_STATUS_ABORT;
     }
     if(channels != 2 || bps != 16) {
-        fprintf(stderr, "ERROR: this example only supports 16bit stereo streams\n");
+        fprintf(stderr, "Error: Audio must be 16 bit stereo, is: %d bit %s\n", bps, channels == 1 ? "mono" : "unknown");
         return FLAC__STREAM_DECODER_WRITE_STATUS_ABORT;
     }
 
     /* write decoded PCM samples */
     for(i = 0; i < frame->header.blocksize; i++) {
-        write_little_endian_uint16((FLAC__uint16)buffer[0][i]);  /* left channel */
-        write_little_endian_uint16((FLAC__uint16)buffer[1][i]);  /* right channel */
+        write_little_endian_uint16((FLAC__uint16) buffer[0][i]);  /* left channel */
+        write_little_endian_uint16((FLAC__uint16) buffer[1][i]);  /* right channel */
     }
 
     return FLAC__STREAM_DECODER_WRITE_STATUS_CONTINUE;
@@ -85,5 +85,5 @@ void FLACDecoder::metadata_callback(const ::FLAC__StreamMetadata *metadata)
 
 void FLACDecoder::error_callback(::FLAC__StreamDecoderErrorStatus status)
 {
-    fprintf(stderr, "Got error callback: %s\n", FLAC__StreamDecoderErrorStatusString[status]);
+    fprintf(stderr, "FLACDecoder error: %s\n", FLAC__StreamDecoderErrorStatusString[status]);
 }
