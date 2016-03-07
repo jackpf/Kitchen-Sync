@@ -5,6 +5,8 @@
 #include <soundtouch/BPMDetect.h>
 
 #include "WavFile.h"
+#include "FLACDecoder.h"
+#include "AudioFile.h"
 #include "KitchenSyncAnalyser.h"
 
 using namespace soundtouch;
@@ -29,8 +31,8 @@ private:
     SoundTouch *soundTouch;
     RunParameters *params;
 
-    WavInFile *inFile;
-    WavOutFile *outFile;
+    AudioInFile *inFile = nullptr;
+    WavOutFile *outFile = nullptr;
 
     void openFiles();
     void process();

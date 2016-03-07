@@ -8,6 +8,12 @@ KitchenSync::KitchenSync(RunParameters *params) : BUFF_SIZE(6720) {
 }
 
 KitchenSync::~KitchenSync() {
+    if (inFile != nullptr) {
+        delete inFile;
+    }
+    if (outFile != nullptr) {
+        delete outFile;
+    }
     delete soundTouch;
 }
 
@@ -15,7 +21,7 @@ void KitchenSync::openFiles() {
     int bits, samplerate, channels;
 
     assert(params->inFileName != nullptr);
-    inFile = new WavInFile(params->inFileName);
+    inFile = AudioFileFactory::createAudioInFile(params->inFileName);
 
     bits = (int) inFile->getNumBits();
     samplerate = (int) inFile->getSampleRate();
@@ -82,12 +88,10 @@ float KitchenSync::getBpm() {
     bpm = bpmDetector->getBpm();
     inFile->rewind();
 
-    fprintf(stderr, "Done!\n");
-
     if (bpm > 0.0) {
-        printf("Detected BPM rate %.1f\n\n", bpm);
+        fprintf(stderr, "Detected BPM rate %.1f\n\n", bpm);
     } else {
-        printf("Couldn't detect BPM rate.\n\n");
+        fprintf(stderr, "Couldn't detect BPM rate.\n\n");
     }
 
     delete bpmDetector;
@@ -147,6 +151,8 @@ void KitchenSync::setBpm(float fromBpm, float toBpm) {
     sampleRate = (int) inFile->getSampleRate();
     channels = (int) inFile->getNumChannels();
 
+    params->rateDelta = (toBpm / fromBpm - 1.0f) * 100.0f;
+
     soundTouch->setSampleRate(sampleRate);
     soundTouch->setChannels(channels);
 
@@ -162,8 +168,6 @@ void KitchenSync::setBpm(float fromBpm, float toBpm) {
         soundTouch->setSetting(SETTING_SEEKWINDOW_MS, 15);
         soundTouch->setSetting(SETTING_OVERLAP_MS, 8);
     }
-
-    params->rateDelta = (toBpm / fromBpm - 1.0f) * 100.0f;
 
     printInfo();
 

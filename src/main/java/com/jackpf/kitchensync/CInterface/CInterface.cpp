@@ -23,6 +23,28 @@ JNIEXPORT jstring JNICALL Java_com_jackpf_kitchensync_CInterface_CInterface_getV
     return env->NewStringUTF(ks.getVersion());
 }
 
+JNIEXPORT jboolean JNICALL Java_com_jackpf_kitchensync_CInterface_CInterface_hasDecoderFor
+  (JNIEnv * env, jobject obj, jstring jFilename)
+{
+    const char *filename;
+    bool r;
+
+    filename = env->GetStringUTFChars(jFilename, 0);
+
+    try {
+        RunParameters params;
+        params.inFileName = filename;
+        KitchenSync ks(&params);
+        r = true;
+    } catch (const std::runtime_error &e) {
+        r = false;
+    }
+
+    env->ReleaseStringUTFChars(jFilename, filename);
+
+    return (jboolean) r;
+}
+
 JNIEXPORT jfloat JNICALL Java_com_jackpf_kitchensync_CInterface_CInterface_getBpm
   (JNIEnv *env, jobject obj, jstring jFilename)
 {

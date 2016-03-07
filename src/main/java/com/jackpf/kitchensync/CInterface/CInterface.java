@@ -5,6 +5,7 @@ package com.jackpf.kitchensync.CInterface;
  */
 public class CInterface {
     public native String getVersion();
+    public native boolean hasDecoderFor(String filename);
     public native float getBpm(String filename);
     public native void setBpm(String inFilename, String outFilename, float fromBpm, float toBpm);
     public native float getQuality(String filename);

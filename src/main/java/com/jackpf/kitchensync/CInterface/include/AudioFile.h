@@ -13,6 +13,8 @@ public:
     virtual uint getSampleRate() const = 0;
     virtual uint getBytesPerSample() const = 0;
     virtual uint getNumSamples() const = 0;
+    virtual uint getNumBits() const = 0;
+    virtual void rewind() = 0;
 };
 
 class AudioFileFactory {

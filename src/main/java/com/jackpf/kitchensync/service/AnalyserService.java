@@ -8,8 +8,6 @@ import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import sun.awt.Mutex;
 
-import java.io.IOException;
-
 /**
  * Created by jackfarrelly on 26/01/2016.
  */
@@ -36,14 +34,18 @@ public class AnalyserService extends Service<Float> {
                 mutex.lock();
 
                 try {
-                    ffmpeg.run(new String[]{"-i", trackInfo.getFile().getAbsolutePath(), trackInfo.getTmpFile().getAbsolutePath()});
+                    String filename;
 
-                    if (!trackInfo.getTmpFile().exists()) {
-                        throw new IOException("File " + trackInfo.getTmpFile().getAbsolutePath() + " does not exist");
+                    if (cInterface.hasDecoderFor(trackInfo.getFile().getAbsolutePath())) {
+                        filename = trackInfo.getFile().getAbsolutePath();
+                    } else {
+                        ffmpeg.run(new String[]{"-i", trackInfo.getFile().getAbsolutePath(), trackInfo.getTmpFile().getAbsolutePath()});
+                        filename = trackInfo.getTmpFile().getAbsolutePath();
                     }
 
-                    float bpm = cInterface.getBpm(trackInfo.getTmpFile().getAbsolutePath());
-                    float quality = cInterface.getQuality(trackInfo.getTmpFile().getAbsolutePath());
+                    //float bpm = cInterface.getBpm(trackInfo.getTmpFile().getAbsolutePath());
+                    float bpm = cInterface.getBpm(filename);
+                    float quality = cInterface.getQuality(filename);
 
                     trackInfo.setQuality(quality);
 

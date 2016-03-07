@@ -11,6 +11,6 @@ AudioInFile *AudioFileFactory::createAudioInFile(const char *cFilename) {
     } else if (ext == "flac") {
         return new FLACDecoder(cFilename);
     } else {
-        return nullptr;
+        throw std::runtime_error(std::string("No decoder found for extension: ") + ext);
     }
 }

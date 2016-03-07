@@ -2,15 +2,14 @@ package com.jackpf.kitchensync.service;
 
 import com.jackpf.kitchensync.CInterface.CInterface;
 import com.jackpf.kitchensync.Executor;
-import com.jackpf.kitchensync.entity.Info;
 import com.jackpf.kitchensync.TagWriter;
+import com.jackpf.kitchensync.entity.Info;
 import com.jackpf.kitchensync.executor.FFMPEGExecutor;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import sun.awt.Mutex;
 
 import java.io.File;
-import java.io.IOException;
 
 /**
  * Created by jackfarrelly on 26/01/2016.
@@ -44,22 +43,21 @@ public class ProcessorService extends Service<Info> {
                 mutex.lock();
 
                 try {
-                    ffmpeg.run(new String[]{"-i", trackInfo.getFile().getAbsolutePath(), trackInfo.getTmpFile().getAbsolutePath()});
+                    String filename;
 
-                    if (!trackInfo.getTmpFile().exists()) {
-                        throw new IOException("File " + trackInfo.getTmpFile().getAbsolutePath() + " does not exist");
+                    if (cInterface.hasDecoderFor(trackInfo.getFile().getAbsolutePath())) {
+                        filename = trackInfo.getFile().getAbsolutePath();
+                    } else {
+                        ffmpeg.run(new String[]{"-i", trackInfo.getFile().getAbsolutePath(), trackInfo.getTmpFile().getAbsolutePath()});
+                        filename = trackInfo.getTmpFile().getAbsolutePath();
                     }
 
                     cInterface.setBpm(
-                        trackInfo.getTmpFile().getAbsolutePath(),
+                        filename,
                         trackInfo.getTmpFile2().getAbsolutePath(),
                         Float.parseFloat(trackInfo.getBpm()),
                         targetBpm
                     );
-
-                    if (!trackInfo.getTmpFile2().exists()) {
-                        throw new IOException("File " + trackInfo.getTmpFile2().getAbsolutePath() + " does not exist");
-                    }
 
                     TagWriter.Tags tags = new TagWriter(trackInfo).getTags();
 

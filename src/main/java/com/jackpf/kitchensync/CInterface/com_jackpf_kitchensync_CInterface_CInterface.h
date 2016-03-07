@@ -17,6 +17,14 @@ JNIEXPORT jstring JNICALL Java_com_jackpf_kitchensync_CInterface_CInterface_getV
 
 /*
  * Class:     com_jackpf_kitchensync_CInterface_CInterface
+ * Method:    hasDecoderFor
+ * Signature: (Ljava/lang/String;)Z
+ */
+JNIEXPORT jboolean JNICALL Java_com_jackpf_kitchensync_CInterface_CInterface_hasDecoderFor
+  (JNIEnv *, jobject, jstring);
+
+/*
+ * Class:     com_jackpf_kitchensync_CInterface_CInterface
  * Method:    getBpm
  * Signature: (Ljava/lang/String;)F
  */
