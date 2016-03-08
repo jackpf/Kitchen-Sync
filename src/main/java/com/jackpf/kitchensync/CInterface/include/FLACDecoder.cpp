@@ -38,7 +38,7 @@ uint FLACDecoder::getNumChannels() const {
 }
 
 uint FLACDecoder::getSampleRate() const {
-    return (uint) sample_rate;
+    return (uint) sampleRate;
 }
 
 uint FLACDecoder::getBytesPerSample() const {
@@ -46,7 +46,7 @@ uint FLACDecoder::getBytesPerSample() const {
 }
 
 uint FLACDecoder::getNumSamples() const {
-    return (uint) total_samples;
+    return (uint) totalSamples;
 }
 
 uint FLACDecoder::getNumBits() const {
@@ -60,7 +60,7 @@ void FLACDecoder::rewind() {
 ::FLAC__StreamDecoderWriteStatus FLACDecoder::write_callback(const ::FLAC__Frame *frame, const FLAC__int32 * const buffer[]) {
     size_t i;
 
-    if(total_samples == 0) {
+    if(totalSamples == 0) {
         //fprintf(stderr, "Error: no sample_count in STREAMINFO\n");
         //return FLAC__STREAM_DECODER_WRITE_STATUS_ABORT;
         throw std::runtime_error("No sample_count in STREAMINFO\n");
@@ -92,8 +92,8 @@ void FLACDecoder::rewind() {
 void FLACDecoder::metadata_callback(const ::FLAC__StreamMetadata *metadata) {
     if(metadata->type == FLAC__METADATA_TYPE_STREAMINFO) {
         /* save for later */
-        total_samples = metadata->data.stream_info.total_samples;
-        sample_rate = metadata->data.stream_info.sample_rate;
+        totalSamples = metadata->data.stream_info.total_samples;
+        sampleRate = metadata->data.stream_info.sample_rate;
         channels = metadata->data.stream_info.channels;
         bps = metadata->data.stream_info.bits_per_sample;
     }

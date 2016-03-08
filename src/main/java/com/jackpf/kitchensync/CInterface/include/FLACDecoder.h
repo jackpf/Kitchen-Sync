@@ -51,12 +51,12 @@
     }
 #endif
 
-class FLACDecoder: public FLAC::Decoder::File, public AudioInFile {
+class FLACDecoder : public FLAC::Decoder::File, public AudioInFile {
 protected:
     const char *filename;
 
-    FLAC__uint64 total_samples  = 0;
-    unsigned int sample_rate    = 0;
+    FLAC__uint64 totalSamples   = 0;
+    unsigned int sampleRate     = 0;
     unsigned int channels       = 0;
     unsigned int bps            = 0;
 
