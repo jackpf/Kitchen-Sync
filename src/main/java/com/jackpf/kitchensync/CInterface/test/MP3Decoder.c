@@ -1,246 +1,71 @@
-/*
- * libmad - MPEG audio decoder library
- * Copyright (C) 2000-2004 Underbit Technologies, Inc.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *
- * $Id: minimad.c,v 1.4 2004/01/23 09:41:32 rob Exp $
- */
+#include <stdio.h>
+#include <lame/lame.h>
+#include "../include/WavFile.h"
+#include <iostream>
 
-# include <stdio.h>
-# include <unistd.h>
-# include <sys/stat.h>
-# include <sys/mman.h>
+using namespace std;
 
-# include "mad.h"
+#define MP3_SIZE 8192
+#define PCM_SIZE MP3_SIZE * 128
 
-/*
- * This is perhaps the simplest example use of the MAD high-level API.
- * Standard input is mapped into memory via mmap(), then the high-level API
- * is invoked with three callbacks: input, output, and error. The output
- * callback converts MAD's high-resolution PCM samples to 16 bits, then
- * writes them to standard output in little-endian, stereo-interleaved
- * format.
- */
-
-static int decode(unsigned char const *, unsigned long);
+void printInfo(const char *filename, mp3data_struct *mp3data) {
+    cerr << filename << ":\n\t" <<
+        "channels=" << mp3data->stereo <<
+        ", sampleRate=" << mp3data->samplerate <<
+        ", frameSize=" << mp3data->framesize <<
+        ", numSamples=" << mp3data->framesize * mp3data->totalframes <<
+    endl;
+}
 
 int main(int argc, char *argv[])
 {
-  struct stat stat;
-  void *fdm;
+    int read;
+    int decoded;
+    mp3data_struct mp3data;
 
-  if (argc != 1)
-    return 1;
+    short pcm_buffer_l[PCM_SIZE];
+    short pcm_buffer_r[PCM_SIZE];
+    unsigned char mp3_buffer[MP3_SIZE];
 
-  if (fstat(STDIN_FILENO, &stat) == -1 ||
-      stat.st_size == 0)
-    return 2;
+    FILE *mp3 = fopen(argv[1], "r");
+    hip_t hip = hip_decode_init();
+    WavOutFile *outFile = nullptr;
 
-  fdm = mmap(0, stat.st_size, PROT_READ, MAP_SHARED, STDIN_FILENO, 0);
-  if (fdm == MAP_FAILED)
-    return 3;
+    do {
+        read = fread(mp3_buffer, sizeof(unsigned char), MP3_SIZE, mp3);
 
-  decode(fdm, stat.st_size);
+        decoded = hip_decode_headers(hip, mp3_buffer, MP3_SIZE, pcm_buffer_l, pcm_buffer_r, &mp3data);
 
-  if (munmap(fdm, stat.st_size) == -1)
-    return 4;
+        if (mp3data.header_parsed == 1 && outFile == nullptr) {
+            printInfo(argv[1], &mp3data);
+            outFile = new WavOutFile(argv[2], mp3data.samplerate, 16, mp3data.stereo);
+        }
 
-  return 0;
-}
+        if (mp3data.header_parsed == 1 && outFile != nullptr) {
+            short buf[decoded * 2];
+            for (int i = 0, j = 0; i < decoded; i += 2, j++) {
+                buf[i] = pcm_buffer_l[j];
+                buf[i + 1] = pcm_buffer_r[j];
+            }
+            outFile->write(buf, decoded * 2);
+        }
 
-/*
- * This is a private message structure. A generic pointer to this structure
- * is passed to each of the callback functions. Put here any data you need
- * to access from within the callbacks.
- */
+        /*int i;
+        double conv = 1.0 / 32768.0;
+        for (i = 0; i < decoded; i++) {
+            //printf("l=%f, r=%f\n", pcm_buffer_l[i] * conv, pcm_buffer_r[i] * conv);
+            //leftChannel.push_back(pcm_buffer_l[i] * conv);
+            //rightChannel.push_back(pcm_buffer_r[i] * conv);
+        }*/
 
-struct buffer {
-  unsigned char const *start;
-  unsigned long length;
-};
+        //printf("Read %d bytes, decoded %d bytes\n", read, decoded);
+    } while (read != 0);
 
-/*
- * This is the input callback. The purpose of this callback is to (re)fill
- * the stream buffer which is to be decoded. In this example, an entire file
- * has been mapped into memory, so we just call mad_stream_buffer() with the
- * address and length of the mapping. When this callback is called a second
- * time, we are finished decoding.
- */
+    delete outFile;
+    hip_decode_exit(hip);
+    fclose(mp3);
 
-static
-enum mad_flow input(void *data,
-		    struct mad_stream *stream)
-{
-  struct buffer *buffer = data;
+    printf("done\n");
 
-  if (!buffer->length)
-    return MAD_FLOW_STOP;
-
-  mad_stream_buffer(stream, buffer->start, buffer->length);
-
-  buffer->length = 0;
-
-  return MAD_FLOW_CONTINUE;
-}
-
-/*
- * The following utility routine performs simple rounding, clipping, and
- * scaling of MAD's high-resolution samples down to 16 bits. It does not
- * perform any dithering or noise shaping, which would be recommended to
- * obtain any exceptional audio quality. It is therefore not recommended to
- * use this routine if high-quality output is desired.
- */
-
-static double min = 0.0, max = 0.0, mean = 0.0, allmin = 0.0, allmax = 0.0;
-
-static inline
-signed int scale(mad_fixed_t sample)
-{
-  double s = mad_f_todouble(sample);
-  if(min > s) min = s;
-  if(max < s) max = s;
-  mean += s * (1.0 / 1152.0);
-
-  /* round */
-  sample += (1L << (MAD_F_FRACBITS - 16));
-
-  /* clip */
-  if (sample >= MAD_F_ONE)
-    sample = MAD_F_ONE - 1;
-  else if (sample < -MAD_F_ONE)
-    sample = -MAD_F_ONE;
-
-  /* quantize */
-  return sample >> (MAD_F_FRACBITS + 1 - 16);
-}
-
-/*
- * This is the output callback function. It is called after each frame of
- * MPEG audio data has been completely decoded. The purpose of this callback
- * is to output (or play) the decoded PCM audio.
- */
-
-static int STEPS_COUNT = 0;
-
-static
-enum mad_flow output(void *data,
-		     struct mad_header const *header,
-		     struct mad_pcm *pcm)
-{
-  // DEBUG
-  //if(STEPS_COUNT++ >= 1) exit(1);
-  //return MAD_FLOW_CONTINUE;
-  // END DEBUG
-
-  unsigned int nchannels, nsamples;
-  mad_fixed_t const *left_ch, *right_ch;
-
-  /* pcm->samplerate contains the sampling frequency */
-
-  nchannels = pcm->channels;
-  nsamples  = pcm->length;
-  left_ch   = pcm->samples[0];
-  right_ch  = pcm->samples[1];
-
-  while (nsamples--) {
-    signed int sample;
-
-    /* output sample(s) in 16-bit signed little-endian PCM */
-
-    sample = scale(*left_ch++);
-    //putchar((sample >> 0) & 0xff);
-    //putchar((sample >> 8) & 0xff);
-
-    if (nchannels == 2) {
-      sample = scale(*right_ch++);
-      //putchar((sample >> 0) & 0xff);
-      //putchar((sample >> 8) & 0xff);
-    }
-  }
-
-  fprintf(stderr, "min = %f, max = %f, mean = %f\n", min, max, mean);
-
-  if(allmin > min) allmin = min;
-  if(allmax < max) allmax = max;
-  mean = 0.0;
-  min = 0.0;
-  max = 0.0;
-
-  return MAD_FLOW_CONTINUE;
-}
-
-/*
- * This is the error callback function. It is called whenever a decoding
- * error occurs. The error is indicated by stream->error; the list of
- * possible MAD_ERROR_* errors can be found in the mad.h (or stream.h)
- * header file.
- */
-
-static
-enum mad_flow error(void *data,
-		    struct mad_stream *stream,
-		    struct mad_frame *frame)
-{
-  struct buffer *buffer = data;
-
-  fprintf(stderr, "decoding error 0x%04x (%s) at byte offset %u\n",
-	  stream->error, mad_stream_errorstr(stream),
-	  stream->this_frame - buffer->start);
-
-  /* return MAD_FLOW_BREAK here to stop decoding (and propagate an error) */
-
-  return MAD_FLOW_CONTINUE;
-}
-
-/*
- * This is the function called by main() above to perform all the decoding.
- * It instantiates a decoder object and configures it with the input,
- * output, and error callback functions above. A single call to
- * mad_decoder_run() continues until a callback function returns
- * MAD_FLOW_STOP (to stop decoding) or MAD_FLOW_BREAK (to stop decoding and
- * signal an error).
- */
-
-static
-int decode(unsigned char const *start, unsigned long length)
-{
-  struct buffer buffer;
-  struct mad_decoder decoder;
-  int result;
-
-  /* initialize our private message structure */
-
-  buffer.start  = start;
-  buffer.length = length;
-
-  /* configure input, output, and error functions */
-
-  mad_decoder_init(&decoder, &buffer,
-		   input, 0 /* header */, 0 /* filter */, output,
-		   error, 0 /* message */);
-
-  /* start decoding */
-
-  result = mad_decoder_run(&decoder, MAD_DECODER_MODE_SYNC);
-
-  /* release the decoder */
-
-  mad_decoder_finish(&decoder);
-
-  fprintf(stderr, "allmin = %f, allmax = %f\n", allmin, allmax);
-
-  return result;
+    return 0;
 }
