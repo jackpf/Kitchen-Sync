@@ -22,7 +22,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin")
 file(GLOB includes
     "../include/*.cpp"
 )
-set(libraries soundtouch fftw3 m flac flac++ aiff)
+set(libraries soundtouch fftw3 m flac flac++ aiff mp3lame)
 
 add_executable(kstest Test.cpp ../KitchenSync.cpp ${includes})
 target_link_libraries(kstest ${libraries})

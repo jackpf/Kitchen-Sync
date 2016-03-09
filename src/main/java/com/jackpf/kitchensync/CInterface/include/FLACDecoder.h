@@ -60,10 +60,10 @@ protected:
     unsigned int channels       = 0;
     unsigned int bps            = 0;
 
-    std::vector<short> data;
+    std::vector<float> data;
     unsigned int ptr = 0;
 
-    void write_little_endian_uint16_x2(FLAC__uint16 x1, FLAC__uint16 x2);
+    void writeBuffer(FLAC__int32 x, int bps);
 
     ::FLAC__StreamDecoderWriteStatus write_callback(const ::FLAC__Frame *frame, const FLAC__int32 * const buffer[]);
     void metadata_callback(const ::FLAC__StreamMetadata *metadata);

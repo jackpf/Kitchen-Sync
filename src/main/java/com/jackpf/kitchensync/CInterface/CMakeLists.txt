@@ -23,7 +23,7 @@ file(GLOB includes
 )
 
 add_executable(libkitchensync.dylib CInterface.cpp KitchenSync.cpp ${includes})
-target_link_libraries(libkitchensync.dylib soundtouch fftw3 m flac flac++)
+target_link_libraries(libkitchensync.dylib soundtouch fftw3 m flac flac++ mp3lame aiff)
 
 # Install targets
 install(TARGETS libkitchensync.dylib DESTINATION /usr/local/lib/)

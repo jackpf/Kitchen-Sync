@@ -6,8 +6,8 @@
 
 using namespace std;
 
-#define MP3_SIZE 8192
-#define PCM_SIZE MP3_SIZE * 16
+#define MP3_SIZE 1024
+#define PCM_SIZE MP3_SIZE * 1152
 
 void printInfo(const char *filename, mp3data_struct *mp3data) {
     cerr << filename << ":\n\t" <<
@@ -32,21 +32,29 @@ int main(int argc, char *argv[])
     hip_t hip = hip_decode_init();
     WavOutFile *outFile = nullptr;
 
+    unsigned char headerBuf[1024];
+    int len;
+
+    do {
+        len = fread(headerBuf, sizeof(unsigned char), 1024, mp3);
+        hip_decode1_headers(hip, headerBuf, len, pcm_buffer_l, pcm_buffer_r, &mp3data);
+    } while (mp3data.header_parsed == 0 && len > 0);
+
+    printInfo(argv[1], &mp3data);
+    outFile = new WavOutFile(argv[2], mp3data.samplerate, 16, mp3data.stereo);
+
+    double conv = 1.0 / 32768.0;
+
     do {
         read = fread(mp3_buffer, sizeof(unsigned char), MP3_SIZE, mp3);
 
         decoded = hip_decode_headers(hip, mp3_buffer, MP3_SIZE, pcm_buffer_l, pcm_buffer_r, &mp3data);
 
-        if (mp3data.header_parsed == 1 && outFile == nullptr) {
-            printInfo(argv[1], &mp3data);
-            outFile = new WavOutFile(argv[2], mp3data.samplerate, 16, mp3data.stereo);
-        }
-
         if (outFile != nullptr) {
-            short buf[decoded * 2];
+            float buf[decoded * 2];
             for (int i = 0, j = 0; i < decoded * 2; i += 2, j++) {
-                buf[i] = pcm_buffer_l[j];
-                buf[i + 1] = pcm_buffer_r[j];
+                buf[i] = (float) pcm_buffer_l[j] * conv;
+                buf[i + 1] = (float) pcm_buffer_r[j] * conv;
             }
             outFile->write(buf, decoded * 2);
         }

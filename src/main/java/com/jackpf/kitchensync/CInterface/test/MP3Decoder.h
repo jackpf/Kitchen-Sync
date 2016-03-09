@@ -1,4 +1,0 @@
-#ifndef __Kitchen_Sync_MP3_Decoder_h__
-#define __Kitchen_Sync_MP3_Decoder_h__
-
-#endif
