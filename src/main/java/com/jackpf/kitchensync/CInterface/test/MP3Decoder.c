@@ -1,12 +1,13 @@
 #include <stdio.h>
-#include <lame/lame.h>
-#include "../include/WavFile.h"
 #include <iostream>
+#include <lame/lame.h>
+
+#include "../include/WavFile.h"
 
 using namespace std;
 
 #define MP3_SIZE 8192
-#define PCM_SIZE MP3_SIZE * 128
+#define PCM_SIZE MP3_SIZE * 16
 
 void printInfo(const char *filename, mp3data_struct *mp3data) {
     cerr << filename << ":\n\t" <<
@@ -41,24 +42,14 @@ int main(int argc, char *argv[])
             outFile = new WavOutFile(argv[2], mp3data.samplerate, 16, mp3data.stereo);
         }
 
-        if (mp3data.header_parsed == 1 && outFile != nullptr) {
+        if (outFile != nullptr) {
             short buf[decoded * 2];
-            for (int i = 0, j = 0; i < decoded; i += 2, j++) {
+            for (int i = 0, j = 0; i < decoded * 2; i += 2, j++) {
                 buf[i] = pcm_buffer_l[j];
                 buf[i + 1] = pcm_buffer_r[j];
             }
             outFile->write(buf, decoded * 2);
         }
-
-        /*int i;
-        double conv = 1.0 / 32768.0;
-        for (i = 0; i < decoded; i++) {
-            //printf("l=%f, r=%f\n", pcm_buffer_l[i] * conv, pcm_buffer_r[i] * conv);
-            //leftChannel.push_back(pcm_buffer_l[i] * conv);
-            //rightChannel.push_back(pcm_buffer_r[i] * conv);
-        }*/
-
-        //printf("Read %d bytes, decoded %d bytes\n", read, decoded);
     } while (read != 0);
 
     delete outFile;
