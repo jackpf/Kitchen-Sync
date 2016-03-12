@@ -128,7 +128,7 @@ private:
     FILE *fptr;
 
     /// Position within the audio stream
-    long position;
+    //long position;
 
     /// Counter of how many bytes of sample data have been read from the file.
     long dataRead;

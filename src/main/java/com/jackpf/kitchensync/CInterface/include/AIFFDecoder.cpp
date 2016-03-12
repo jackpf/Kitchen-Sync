@@ -7,12 +7,27 @@ AIFFDecoder::AIFFDecoder(const char *filename) {
         throw std::runtime_error(std::string("Unable to open ") + filename);
     }
 
+    readFormat();
+}
+
+void AIFFDecoder::readFormat() {
+    uint64_t totalSamples;
+    double sampleRate;
+    int channels;
+    int bps;
+    int segmentSize;
+
     if (AIFF_GetAudioFormat(ref,
                 &totalSamples, &channels,
                 &sampleRate, &bps,
                 &segmentSize) < 1) {
         throw std::runtime_error(std::string("Unable to get audio format for ") + filename);
     }
+
+    this->setNumSamples((uint) totalSamples);
+    this->setSampleRate((uint) sampleRate);
+    this->setNumChannels((uint) channels);
+    this->setNumBits((uint) bps);
 }
 
 int AIFFDecoder::eof() const {
@@ -22,26 +37,6 @@ int AIFFDecoder::eof() const {
 int AIFFDecoder::read(float *buf, int len) {
     sampleCount = AIFF_ReadSamplesFloat(ref, buf, len);
     return sampleCount;
-}
-
-uint AIFFDecoder::getNumChannels() const {
-    return (uint) channels;
-}
-
-uint AIFFDecoder::getSampleRate() const {
-    return (uint) sampleRate;
-}
-
-uint AIFFDecoder::getBytesPerSample() const {
-    return (uint) getNumChannels() * getNumBits() / 8;
-}
-
-uint AIFFDecoder::getNumSamples() const {
-    return (uint) totalSamples;
-}
-
-uint AIFFDecoder::getNumBits() const {
-    return (uint) bps;
 }
 
 void AIFFDecoder::rewind() {

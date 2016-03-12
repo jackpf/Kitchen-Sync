@@ -32,3 +32,6 @@ target_link_libraries(flactest ${libraries})
 
 add_executable(compare Compare.cpp ${includes})
 target_link_libraries(compare ${libraries})
+
+add_executable(mp3test MP3DecoderTest.cpp ${includes})
+target_link_libraries(mp3test ${libraries})

@@ -30,10 +30,10 @@ void MP3Decoder::readHeaders() {
         throw std::runtime_error(std::string("Unable to parse mp3 headers for ") + std::string(filename));
     }
 
-    channels = mp3data.stereo;
-    sampleRate = mp3data.samplerate;
-    bps = 16;
-    totalSamples = mp3data.framesize * mp3data.totalframes;
+    this->setNumSamples((uint) (mp3data.framesize * mp3data.totalframes));
+    this->setSampleRate((uint) mp3data.samplerate);
+    this->setNumChannels((uint) mp3data.stereo);
+    this->setNumBits((uint) 16);
 }
 
 int MP3Decoder::eof() const {
@@ -52,8 +52,8 @@ int MP3Decoder::decodeChunk() {
     decoded = hip_decode(hip, mp3_buffer, read, pcm_buffer_l, pcm_buffer_r);
 
     for (int i = 0; i < decoded; i++) {
-        buffer.push_back((float) pcm_buffer_l[i] * CONV);
-        buffer.push_back((float) pcm_buffer_r[i] * CONV);
+        buffer.push_back((float) _swap16(pcm_buffer_l[i]) * this->getConv());
+        buffer.push_back((float) _swap16(pcm_buffer_r[i]) * this->getConv());
     }
 
     return decoded;
@@ -74,26 +74,6 @@ int MP3Decoder::read(float *buf, int len) {
     }
 
     return i;
-}
-
-uint MP3Decoder::getNumChannels() const {
-    return (uint) channels;
-}
-
-uint MP3Decoder::getSampleRate() const {
-    return (uint) sampleRate;
-}
-
-uint MP3Decoder::getBytesPerSample() const {
-    return (uint) getNumChannels() * getNumBits() / 8;
-}
-
-uint MP3Decoder::getNumSamples() const {
-    return (uint) totalSamples;
-}
-
-uint MP3Decoder::getNumBits() const {
-    return (uint) bps;
 }
 
 void MP3Decoder::rewind() {

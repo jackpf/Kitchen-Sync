@@ -9,7 +9,6 @@
 
 #define MP3_SIZE 1024
 #define PCM_SIZE MP3_SIZE * 1152
-#define CONV 1.0 / 32768.0
 
 class MP3Decoder : public AudioInFile {
 protected:
@@ -20,13 +19,6 @@ protected:
     mp3data_struct mp3data;
     std::vector<float> buffer;
 
-    uint64_t totalSamples   = 0;
-    double sampleRate       = 0;
-    int channels            = 0;
-    int bps                 = 0;
-    int sampleCount;
-    int segmentSize;
-
     void readHeaders();
     int decodeChunk();
 
@@ -36,11 +28,6 @@ public:
 
     int eof() const;
     int read(float *buf, int len);
-    uint getNumChannels() const;
-    uint getSampleRate() const;
-    uint getBytesPerSample() const;
-    uint getNumSamples() const;
-    uint getNumBits() const;
     void rewind();
 };
 

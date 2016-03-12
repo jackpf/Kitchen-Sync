@@ -10,55 +10,9 @@
 #include "share/compat.h"
 #include "AudioFile.h"
 
-#ifdef BYTE_ORDER
-    #if BYTE_ORDER == BIG_ENDIAN
-        #define _BIG_ENDIAN_
-    #endif
-#endif
-
-#ifdef _BIG_ENDIAN_
-    static inline int _swap32(int &dwData) {
-        dwData = ((dwData >> 24) & 0x000000FF) |
-               ((dwData >> 8)  & 0x0000FF00) |
-               ((dwData << 8)  & 0x00FF0000) |
-               ((dwData << 24) & 0xFF000000);
-        return dwData;
-    }
-
-    static inline short _swap16(short &wData) {
-        wData = ((wData >> 8) & 0x00FF) |
-                ((wData << 8) & 0xFF00);
-        return wData;
-    }
-
-    static inline void _swap16Buffer(short *pData, int numWords) {
-        int i;
-
-        for (i = 0; i < numWords; i ++) {
-            pData[i] = _swap16(pData[i]);
-        }
-    }
-#else
-    static inline int _swap32(int &dwData) {
-        return dwData;
-    }
-
-    static inline short _swap16(short &wData) {
-        return wData;
-    }
-
-    static inline void _swap16Buffer(short *pData, int numBytes) {
-    }
-#endif
-
 class FLACDecoder : public FLAC::Decoder::File, public AudioInFile {
 protected:
     const char *filename;
-
-    FLAC__uint64 totalSamples   = 0;
-    unsigned int sampleRate     = 0;
-    unsigned int channels       = 0;
-    unsigned int bps            = 0;
 
     std::vector<float> data;
     unsigned int ptr = 0;
@@ -74,11 +28,6 @@ public:
 
     int eof() const;
     int read(float *buf, int len);
-    uint getNumChannels() const;
-    uint getSampleRate() const;
-    uint getBytesPerSample() const;
-    uint getNumSamples() const;
-    uint getNumBits() const;
     void rewind();
 };
 

@@ -14,14 +14,15 @@ FLACDecoder::FLACDecoder(const char *filename) : FLAC::Decoder::File() {
 }
 
 void FLACDecoder::writeBuffer(FLAC__int32 x, int bps) {
-    if (bps == 16) {
-        double conv = 1.0 / 32768.0;
+    if (bps == 8) {
+        unsigned char v = (unsigned char) x;
+        data.push_back(v * this->getConv() - 1.0);
+    } else if (bps == 16) {
         short v = (short) x;
-        data.push_back(_swap16(v) * conv);
+        data.push_back(_swap16(v) * this->getConv());
     } else if (bps == 24) {
-        double conv = 1.0 / 2147483648.0;
         int v = (int) x;
-        data.push_back(_swap32(v) * conv);
+        data.push_back(_swap32(v) * this->getConv());
     } else {
         throw std::runtime_error(std::string("FLACDecoder error: Unsupported bit depth of ") + std::to_string(bps));
     }
@@ -40,26 +41,6 @@ int FLACDecoder::read(float *buf, int len) {
     return i;
 }
 
-uint FLACDecoder::getNumChannels() const {
-    return (uint) channels;
-}
-
-uint FLACDecoder::getSampleRate() const {
-    return (uint) sampleRate;
-}
-
-uint FLACDecoder::getBytesPerSample() const {
-    return (uint) getNumChannels() * getNumBits() / 8;
-}
-
-uint FLACDecoder::getNumSamples() const {
-    return (uint) totalSamples;
-}
-
-uint FLACDecoder::getNumBits() const {
-    return (uint) bps;
-}
-
 void FLACDecoder::rewind() {
     ptr = 0;
 }
@@ -67,14 +48,14 @@ void FLACDecoder::rewind() {
 ::FLAC__StreamDecoderWriteStatus FLACDecoder::write_callback(const ::FLAC__Frame *frame, const FLAC__int32 *const buffer[]) {
     size_t i;
 
-    if(totalSamples == 0) {
+    if(this->getNumSamples() == 0) {
         throw std::runtime_error("No sample_count in STREAMINFO\n");
     }
 
     for(i = 0; i < frame->header.blocksize; i++) {
-        writeBuffer(buffer[0][i], bps);
-        if (channels == 2) {
-            writeBuffer(buffer[1][i], bps);
+        writeBuffer(buffer[0][i], this->getNumBits());
+        if (this->getNumChannels() == 2) {
+            writeBuffer(buffer[1][i], this->getNumBits());
         }
     }
 
@@ -83,10 +64,10 @@ void FLACDecoder::rewind() {
 
 void FLACDecoder::metadata_callback(const ::FLAC__StreamMetadata *metadata) {
     if(metadata->type == FLAC__METADATA_TYPE_STREAMINFO) {
-        totalSamples = metadata->data.stream_info.total_samples;
-        sampleRate = metadata->data.stream_info.sample_rate;
-        channels = metadata->data.stream_info.channels;
-        bps = metadata->data.stream_info.bits_per_sample;
+        this->setNumSamples((uint) metadata->data.stream_info.total_samples);
+        this->setSampleRate((uint) metadata->data.stream_info.sample_rate);
+        this->setNumChannels((uint) metadata->data.stream_info.channels);
+        this->setNumBits((uint) metadata->data.stream_info.bits_per_sample);
     }
 }
 

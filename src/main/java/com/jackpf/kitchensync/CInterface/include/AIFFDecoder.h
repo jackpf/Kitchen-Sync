@@ -14,24 +14,15 @@ protected:
     const char *filename;
 
     AIFF_Ref ref;
-
-    uint64_t totalSamples   = 0;
-    double sampleRate       = 0;
-    int channels            = 0;
-    int bps                 = 0;
     int sampleCount;
-    int segmentSize;
+
+    void readFormat();
 
 public:
     AIFFDecoder(const char *filename);
 
     int eof() const;
     int read(float *buf, int len);
-    uint getNumChannels() const;
-    uint getSampleRate() const;
-    uint getBytesPerSample() const;
-    uint getNumSamples() const;
-    uint getNumBits() const;
     void rewind();
 };
 
