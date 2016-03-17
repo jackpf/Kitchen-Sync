@@ -17,7 +17,7 @@ class KitchenSyncAnalyser {
 private:
     const char *filename;
     AudioInFile *inFile;
-    float *frequencyMagnitudes;
+    double *frequencyMagnitudes;
 
     void calculateFrequencies(fftw_complex *data, size_t len, int Fs);
     void calculateFrequencyMagnitudes();

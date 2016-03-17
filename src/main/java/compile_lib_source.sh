@@ -1,7 +1,9 @@
 #!/bin/bash
 
-mkdir ./com/jackpf/kitchensync/CInterface/build
-cd ./com/jackpf/kitchensync/CInterface/build
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+mkdir "$DIR/com/jackpf/kitchensync/CInterface/build"
+cd "$DIR/com/jackpf/kitchensync/CInterface/build"
 cmake ..
 make
 make install

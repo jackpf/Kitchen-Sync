@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 2.8.4)
 project(KitchenSyncTest)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
-add_definitions("-Wall -g")
+add_definitions("-Wall -g -Wconversion")
 
 include_directories(
     /usr/local/include/
@@ -35,3 +35,6 @@ target_link_libraries(compare ${libraries})
 
 add_executable(mp3test MP3DecoderTest.cpp ${includes})
 target_link_libraries(mp3test ${libraries})
+
+add_executable(ffttest FFTTest.cpp ${includes})
+target_link_libraries(ffttest ${libraries})

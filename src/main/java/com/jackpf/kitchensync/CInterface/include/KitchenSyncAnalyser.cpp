@@ -7,13 +7,9 @@ KitchenSyncAnalyser::KitchenSyncAnalyser(const char *filename) :
     MAX_AN_FREQ(20) {
     this->filename = filename;
     inFile = AudioFileFactory::createAudioInFile(filename);
-    frequencyMagnitudes = new float[MAX_FREQ + 1];
+    frequencyMagnitudes = new double[MAX_FREQ + 1];
 
     fill_n(frequencyMagnitudes, MAX_FREQ + 1, 0.0);
-
-    if (inFile->getNumChannels() > 1) {
-        //throw new runtime_error("This version only works on mono files :(");
-    }
 }
 
 KitchenSyncAnalyser::~KitchenSyncAnalyser() {
@@ -38,17 +34,17 @@ void KitchenSyncAnalyser::printMagnitudes() {
 
 void KitchenSyncAnalyser::calculateFrequencies(fftw_complex *data, size_t len, int Fs) {
     for (int i = 0; i < len; i++) {
-        int re, im;
-        float freq, magnitude;
+        double re, im;
+        double freq, magnitude;
         int index;
 
         re = data[i][0];
         im = data[i][1];
 
         magnitude = sqrt(re * re + im * im);
-        freq = i * Fs / len;
+        freq = (double) i * Fs / len;
 
-        index = floor(freq / 1000.0);
+        index = (int) floor(freq / 1000.0);
         if (index <= MAX_FREQ) {
             frequencyMagnitudes[index] += magnitude;
         }
@@ -68,7 +64,7 @@ void KitchenSyncAnalyser::calculateFrequencyMagnitudes() {
     p = fftw_plan_dft_1d(BUFF_SIZE, in, out, FFTW_FORWARD, FFTW_ESTIMATE);
 
     while (inFile->eof() == 0) {
-        size_t samplesRead = inFile->read(sampleBuffer, BUFF_SIZE * inFile->getNumChannels());
+        int samplesRead = inFile->read(sampleBuffer, BUFF_SIZE * inFile->getNumChannels());
 
         for (int i = 0, j = 0; j < samplesRead; i++, j += inFile->getNumChannels()) {
             // Convert to mono if necessary
@@ -83,7 +79,7 @@ void KitchenSyncAnalyser::calculateFrequencyMagnitudes() {
 
         fftw_execute(p); /* repeat as needed */
 
-        calculateFrequencies(out, samplesRead / inFile->getNumChannels(), inFile->getSampleRate());
+        calculateFrequencies(out, (size_t) (samplesRead / (int) inFile->getNumChannels()), (int) inFile->getSampleRate());
     }
 
     fftw_destroy_plan(p);
